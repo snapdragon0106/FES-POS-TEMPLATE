@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FES POS</string>
+    <string name="title_activity_main">FES POS</string>
+    <string name="package_name">com.keikousai.fespos</string>
+    <string name="custom_url_scheme">com.keikousai.fespos</string>
+</resources>

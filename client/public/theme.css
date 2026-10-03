@@ -1,0 +1,356 @@
+/*
+ * FES POS design tokens and core glass styles — the one copy shared by
+ * the app (client/src/index.css imports it) and the server-rendered
+ * 合言葉 / login pages (server/pages.ts links /theme.css), so the pages
+ * people see before logging in look exactly like the app. Plain CSS, no
+ * Tailwind, and nothing but styling: it is public (server/gate.ts).
+ *
+ * Dark mode is the .dark class on <html>; the time-of-day tint is
+ * data-daytime on <html> (the app sets both from index.html's inline
+ * script, the server pages from the pos_theme cookie and the clock).
+ */
+
+/* ===== Aurora Glass Tokens — LIGHT scheme ===== */
+:root {
+  /* Glass fills (translucent) — light mode leans clearer/more see-through */
+  --ws-s1: rgba(255, 255, 255, 0.40);   /* card glass (more transparent) */
+  --ws-s2: rgba(255, 255, 255, 0.50);   /* field / secondary fill (kept legible) */
+  --ws-s3: rgba(28, 40, 58, 0.08);      /* neutral chip tint */
+  --ws-sb: rgba(255, 255, 255, 0.44);   /* nav glass */
+  --ws-sb2: rgba(255, 255, 255, 0.72);  /* nav / field hover */
+  --ws-sheet: rgba(255, 255, 255, 0.84);/* modal sheet (opaque enough over the dimmed scrim) */
+
+  /* Text */
+  --ws-tx: #1c2128;
+  --ws-ts: #49535f;
+  --ws-td: #8a95a0;
+
+  /* Glass edges (the bright rim is how glass catches light) */
+  --ws-bd: rgba(255, 255, 255, 0.6);
+  --ws-bdh: rgba(255, 255, 255, 0.85);
+  --ws-cardbd: rgba(255, 255, 255, 0.65);
+  /* Toasts are opaque on purpose: unlike cards they float over arbitrary
+     content (the header, the connection banner, the checkout sheet), and a
+     glass toast over text is unreadable exactly when it matters. */
+  --ws-toast-bg: #ffffff;
+  --ws-toast-bd: rgba(28, 40, 58, 0.14);
+  --ws-glass-hi: rgba(255, 255, 255, 0.9);
+  --ws-glass-lo: rgba(30, 40, 60, 0.06);
+
+  /* Accent — Cosmic Blue (constant, opaque where it carries meaning) */
+  --ws-ac: #0a59f7;
+  --ws-ach: rgba(10, 89, 247, 0.14);
+  --ws-secc: rgba(10, 89, 247, 0.14);
+  --ws-secc-deep: rgba(10, 89, 247, 0.30);
+  --ws-onsecc: #0a59f7;
+
+  /* Semantic */
+  --ws-or: #e0620f;
+  --ws-org: rgba(224, 98, 15, 0.14);
+  --ws-sc: #12924e;
+  --ws-scg: rgba(18, 146, 78, 0.14);
+  --ws-warn: #a86400;
+  --ws-wns: rgba(168, 100, 0, 0.15);
+  --ws-dg: #d43a22;
+  --ws-dgs: rgba(212, 58, 34, 0.13);
+
+  /* Elevation — diffuse, since glass floats */
+  --ws-sh: 0 1px 1px rgba(30, 40, 60, 0.05), 0 12px 34px rgba(30, 40, 60, 0.12);
+  --ws-sh-h: 0 2px 4px rgba(30, 40, 60, 0.07), 0 22px 50px rgba(30, 40, 60, 0.18);
+
+  /* Type */
+  --font-heading: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans JP', system-ui, sans-serif;
+  --font-body: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans JP', system-ui, sans-serif;
+  --font-display: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans JP', sans-serif;
+
+  /* Motion — extremely smooth (silky deceleration + gentle spring) */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Softened from the previous (0.34,1.56,0.64,1): HarmonyOS's default
+     settle uses dampingFraction 0.825 — a single *gentle* overshoot, not a
+     springy wobble. A lower y2 keeps the lively pop without the "ぷるぷる". */
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+
+  /* ===== HarmonyOS (ArkUI) motion system — see research spec ===== */
+  /* ArkUI named Curve enum, exact control points (documented values). */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);   /* FastOutSlowIn: moves */
+  --ease-enter:    cubic-bezier(0, 0, 0.2, 1);      /* LinearOutSlowIn: entrances decelerate in */
+  --ease-exit:     cubic-bezier(0.4, 0, 1, 1);      /* FastOutLinearIn: exits accelerate out */
+  --ease-friction: cubic-bezier(0.2, 0, 0.2, 1);    /* Friction: fades / decay */
+  --ease-sharp:    cubic-bezier(0.33, 0, 0.67, 1);  /* Sharp: crisp confirm */
+
+  /* Spring easings baked from ArkUI physics constants (mass 1) via a
+     spring→linear() generator — cubic-bezier can't express a real spring.
+     settle = springMotion 130/19 (ζ≈0.83, the house content spring);
+     pop = interpolatingSpring 225/30 (near-critical, crisp, no wobble). */
+  --spring-settle: linear(0,0.0062,0.0234,0.0494,0.0824,0.1207,0.163,0.208,0.2547,0.3023,0.3499,0.3972,0.4434,0.4883,0.5315,0.5729,0.6122,0.6493,0.6841,0.7167,0.747,0.7751,0.801,0.8247,0.8465,0.8663,0.8842,0.9004,0.915,0.928,0.9397,0.95,0.9591,0.9672,0.9742,0.9803,0.9856,0.9901,0.9939,0.9972,0.9999);
+  --spring-pop: linear(0,0.0232,0.0798,0.1549,0.2385,0.3238,0.4064,0.4839,0.5548,0.6185,0.6749,0.7243,0.7672,0.8042,0.8358,0.8628,0.8856,0.9049,0.9211,0.9346,0.946,0.9554,0.9633,0.9698,0.9752,0.9796,0.9833,0.9863,0.9888,0.9909,0.9925,0.9939,0.995,0.996,0.9967,0.9973,0.9978,0.9982,0.9986,0.9988,0.9991);
+
+  /* Duration tiers (HarmonyOS guidance: ≤500ms for anything user-triggered) */
+  --dur-press: 140ms;
+  --dur-micro: 200ms;
+  --dur-standard: 300ms;
+  --dur-emphasis: 440ms;
+
+  /* Aurora backdrop (light) — richer colour so the clearer glass has more
+     to reveal through it */
+  --ws-bg-image:
+    radial-gradient(circle, rgba(120, 175, 255, 0.62) 0, transparent 30%),
+    radial-gradient(circle, rgba(255, 168, 214, 0.52) 0, transparent 30%),
+    radial-gradient(circle, rgba(128, 224, 255, 0.56) 0, transparent 30%),
+    radial-gradient(circle, rgba(194, 168, 255, 0.54) 0, transparent 30%);
+  --ws-bg-color: #eaf0fb;
+}
+
+/* Light daytime variants — scoped :not(.dark) so they never touch dark mode */
+html:not(.dark)[data-daytime="morning"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(255, 202, 140, 0.62) 0, transparent 30%),
+    radial-gradient(circle, rgba(255, 172, 200, 0.50) 0, transparent 30%),
+    radial-gradient(circle, rgba(150, 210, 255, 0.56) 0, transparent 30%);
+  --ws-bg-color: #f2eff5;
+}
+html:not(.dark)[data-daytime="day"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(120, 185, 255, 0.64) 0, transparent 30%),
+    radial-gradient(circle, rgba(130, 235, 235, 0.52) 0, transparent 30%),
+    radial-gradient(circle, rgba(170, 195, 255, 0.50) 0, transparent 30%);
+  --ws-bg-color: #eaf1fb;
+}
+html:not(.dark)[data-daytime="evening"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(255, 160, 120, 0.58) 0, transparent 30%),
+    radial-gradient(circle, rgba(230, 155, 220, 0.52) 0, transparent 30%),
+    radial-gradient(circle, rgba(175, 165, 255, 0.52) 0, transparent 30%);
+  --ws-bg-color: #f4eef1;
+}
+html:not(.dark)[data-daytime="night"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(130, 155, 240, 0.54) 0, transparent 30%),
+    radial-gradient(circle, rgba(150, 175, 240, 0.50) 0, transparent 30%);
+  --ws-bg-color: #eaedf6;
+}
+
+/* ===== Aurora Glass Tokens — DARK scheme ===== */
+.dark {
+  --color-background: #07080c;
+  --color-foreground: #eef0f3;
+  --color-card: rgba(255, 255, 255, 0.07);
+  --color-card-foreground: #eef0f3;
+  --color-popover: rgba(26, 28, 34, 0.8);
+  --color-popover-foreground: #eef0f3;
+  --color-primary: #4c8bff;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: rgba(255, 255, 255, 0.08);
+  --color-secondary-foreground: #eef0f3;
+  --color-muted: rgba(255, 255, 255, 0.06);
+  --color-muted-foreground: #aab3bd;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-input: rgba(255, 255, 255, 0.12);
+  --color-ring: #4c8bff;
+
+  /* Glass fills (translucent, dark) */
+  --ws-s1: rgba(255, 255, 255, 0.07);
+  --ws-s2: rgba(255, 255, 255, 0.09);
+  --ws-s3: rgba(255, 255, 255, 0.13);
+  --ws-sb: rgba(255, 255, 255, 0.05);
+  --ws-sb2: rgba(255, 255, 255, 0.11);
+  --ws-sheet: rgba(28, 30, 38, 0.88);
+
+  --ws-tx: #eef0f3;
+  --ws-ts: #aab3bd;
+  --ws-td: #727b86;
+
+  --ws-bd: rgba(255, 255, 255, 0.12);
+  --ws-bdh: rgba(255, 255, 255, 0.24);
+  --ws-cardbd: rgba(255, 255, 255, 0.10);
+  --ws-toast-bg: #1b2330;
+  --ws-toast-bd: rgba(255, 255, 255, 0.16);
+  --ws-glass-hi: rgba(255, 255, 255, 0.16);
+  --ws-glass-lo: rgba(0, 0, 0, 0.30);
+
+  --ws-ac: #4c8bff;
+  --ws-ach: rgba(76, 139, 255, 0.22);
+  --ws-secc: rgba(76, 139, 255, 0.20);
+  --ws-secc-deep: rgba(76, 139, 255, 0.36);
+  --ws-onsecc: #8ab4ff;
+
+  --ws-or: #ff9d5c;
+  --ws-org: rgba(255, 157, 92, 0.18);
+  --ws-sc: #34c46c;
+  --ws-scg: rgba(52, 196, 108, 0.18);
+  --ws-warn: #e6ac3f;
+  --ws-wns: rgba(230, 172, 63, 0.18);
+  --ws-dg: #f0685a;
+  --ws-dgs: rgba(240, 104, 90, 0.18);
+
+  --ws-sh: 0 1px 1px rgba(0, 0, 0, 0.5), 0 14px 34px rgba(0, 0, 0, 0.55);
+  --ws-sh-h: 0 2px 6px rgba(0, 0, 0, 0.6), 0 26px 60px rgba(0, 0, 0, 0.65);
+
+  /* Aurora backdrop (dark) — deep near-black with rich colour pools so
+     the frosted dark glass still has colour to reveal. */
+  --ws-bg-image:
+    radial-gradient(circle, rgba(48, 92, 210, 0.38) 0, transparent 30%),
+    radial-gradient(circle, rgba(150, 60, 190, 0.30) 0, transparent 30%),
+    radial-gradient(circle, rgba(28, 120, 150, 0.32) 0, transparent 30%),
+    radial-gradient(circle, rgba(96, 62, 200, 0.30) 0, transparent 30%);
+  --ws-bg-color: #07080c;
+}
+
+/* Dark daytime variants — scoped html.dark… so they beat plain .dark and
+   never leak into light mode. */
+html.dark[data-daytime="morning"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(190, 120, 60, 0.30) 0, transparent 30%),
+    radial-gradient(circle, rgba(90, 80, 200, 0.30) 0, transparent 30%),
+    radial-gradient(circle, rgba(30, 110, 160, 0.30) 0, transparent 30%);
+  --ws-bg-color: #07080b;
+}
+html.dark[data-daytime="day"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(40, 110, 220, 0.38) 0, transparent 30%),
+    radial-gradient(circle, rgba(30, 150, 170, 0.30) 0, transparent 30%),
+    radial-gradient(circle, rgba(60, 90, 210, 0.28) 0, transparent 30%);
+  --ws-bg-color: #06070c;
+}
+html.dark[data-daytime="evening"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(210, 90, 70, 0.30) 0, transparent 30%),
+    radial-gradient(circle, rgba(150, 60, 170, 0.32) 0, transparent 30%),
+    radial-gradient(circle, rgba(90, 70, 200, 0.30) 0, transparent 30%);
+  --ws-bg-color: #0a070b;
+}
+html.dark[data-daytime="night"] {
+  --ws-bg-image:
+    radial-gradient(circle, rgba(50, 70, 180, 0.32) 0, transparent 30%),
+    radial-gradient(circle, rgba(70, 55, 170, 0.30) 0, transparent 30%);
+  --ws-bg-color: #05060a;
+}
+
+/* Page background: the aurora wash, slowly drifting. */
+body {
+  background-color: var(--ws-bg-color);
+  background-image: var(--ws-bg-image);
+  background-repeat: no-repeat;
+  background-size: 220% 220%, 210% 210%, 230% 230%, 200% 200%;
+  background-position: 10% 15%, 85% 10%, 15% 88%, 88% 85%;
+  background-attachment: fixed;
+  animation: ws-aurora-drift 34s var(--ease-smooth) infinite alternate;
+  color: var(--ws-tx);
+  transition: background-color 0.6s var(--ease-smooth), color 0.3s var(--ease-smooth);
+}
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+}
+
+@keyframes ws-aurora-drift {
+  0%   { background-position: 10% 15%, 85% 10%, 15% 88%, 88% 85%; }
+  25%  { background-position: 32% 38%, 62% 28%, 38% 62%, 68% 62%; }
+  50%  { background-position: 58% 18%, 42% 58%, 60% 42%, 40% 78%; }
+  75%  { background-position: 34% 52%, 72% 68%, 22% 42%, 78% 28%; }
+  100% { background-position: 10% 15%, 85% 10%, 15% 88%, 88% 85%; }
+}
+
+@keyframes ws-fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@keyframes ws-pop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+
+.ws-fade { animation: ws-fade-in 0.45s var(--ease-smooth) both; }
+
+/* ===== Glass card ===== */
+.ws-card {
+  position: relative;
+  overflow: hidden;
+  overflow: clip;
+  background: var(--ws-s1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.9);
+  backdrop-filter: blur(20px) saturate(1.9);
+  border-radius: 22px;
+  border: 1px solid var(--ws-cardbd);
+  box-shadow:
+    inset 0 1px 0 var(--ws-glass-hi),
+    inset 0 -1px 0 var(--ws-glass-lo),
+    var(--ws-sh);
+  transition: box-shadow 0.35s var(--ease-smooth), transform 0.3s var(--ease-smooth),
+    background-color 0.4s var(--ease-smooth), border-color 0.4s var(--ease-smooth);
+}
+/* Specular sheen: light catching the top-left curve of the pane */
+/* Dichroic sheen: unlike Apple's neutral white specular, this glass has a
+   thin-film / dichroic (iridescent) coating — a cool cyan→violet cast at
+   the top-left that shifts to a warm rose→gold fringe at the bottom-right,
+   like art glass or an oil-slick film. This is the signature that sets the
+   look apart from Liquid Glass while keeping (and enhancing) transparency. */
+.ws-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg,
+    rgba(120, 214, 255, 0.55) 0%,
+    rgba(178, 156, 255, 0.34) 9%,
+    rgba(255, 255, 255, 0.32) 19%,
+    transparent 38%,
+    transparent 63%,
+    rgba(255, 168, 205, 0.16) 89%,
+    rgba(255, 206, 150, 0.34) 100%);
+  opacity: 0.62;
+}
+
+/* ===== Inputs — translucent, still readable ===== */
+.ws-input {
+  background: var(--ws-s2);
+  border: 1px solid var(--ws-bd);
+  color: var(--ws-tx);
+  border-radius: 15px;
+  padding: 12px 16px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.25s var(--ease-smooth), box-shadow 0.25s var(--ease-smooth),
+    background-color 0.3s var(--ease-smooth);
+}
+.ws-input:focus {
+  background: var(--ws-sb2);
+  border-color: var(--ws-ac);
+  box-shadow: 0 0 0 3px var(--ws-ach);
+}
+.ws-input::placeholder { color: var(--ws-td); }
+
+.hos-title { font-family: var(--font-heading); font-size: 24px; font-weight: 800; color: var(--ws-tx); }
+
+.hos-subtitle { font-family: var(--font-heading); font-size: 16px; font-weight: 600; color: var(--ws-tx); }
+
+.hos-caption { font-family: var(--font-body); font-size: 11px; font-weight: 500; color: var(--ws-td); letter-spacing: 0.02em; }
+
+/* ===== Icon-chips — two-tone (set inline) + tap settle-bounce ===== */
+.ws-icon-chip, .ws-icon-chip-sm {
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--ws-bd);
+  transition: transform 0.18s var(--ease-spring), background-color 0.25s var(--ease-smooth),
+    border-color 0.25s var(--ease-smooth);
+}
+.ws-icon-chip { width: 44px; height: 44px; font-size: 20px; }
+.ws-icon-chip-sm { width: 34px; height: 34px; font-size: 15px; }
+
+/* ===== PIN entry boxes ===== */
+.ws-pin-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ws-s2);
+  border: 1px solid var(--ws-bd);
+  transition: border-color 0.25s var(--ease-smooth), background-color 0.25s var(--ease-smooth),
+    transform 0.3s var(--ease-spring), box-shadow 0.25s var(--ease-smooth);
+}
+.ws-pin-box-filled {
+  border-color: var(--ws-ac);
+  background: var(--ws-sb2);
+  transform: scale(1.06);
+  box-shadow: 0 0 0 3px var(--ws-ach);
+}
+.ws-pin-box-dot { width: 12px; height: 12px; border-radius: 999px; background: var(--ws-ac); animation: ws-pop 0.3s var(--ease-spring) both; }

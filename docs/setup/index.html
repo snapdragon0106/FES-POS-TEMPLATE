@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>FES POS セットアップ手順書</title>
+<style>
+  @page { size: A4; margin: 17mm 15mm 20mm; }
+
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --blue:#1d4ed8; --navy:#051733; --green:#15803d; --orange:#ea580c;
+    --red:#dc2626; --purple:#7c3aed;
+    --line:#dbe3ef; --soft:#f1f5fb;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    margin:0; color:var(--ink);
+    font-family:"Noto Sans CJK JP","Noto Sans JP",sans-serif;
+    font-size:9.8pt; line-height:1.72; font-feature-settings:"palt" 1;
+  }
+
+  /* ---------- cover ---------- */
+  .cover{ height:247mm; display:flex; flex-direction:column; break-after:page; position:relative; }
+  .cover-top{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .cover-badge{
+    width:74px; height:74px; border-radius:22px; display:flex; align-items:center; justify-content:center;
+    font-size:38px; background:radial-gradient(circle at 32% 28%,#dbeafe 0%,#bfdbfe 100%);
+    border:1.5px solid #bfdbfe; margin-bottom:22px;
+  }
+  .cover h1{ font-size:38pt; line-height:1.18; margin:0 0 6px; letter-spacing:-.02em; color:var(--navy); }
+  .cover .sub{ font-size:14pt; color:var(--blue); font-weight:700; margin-bottom:26px; }
+  .cover .lead{ font-size:11pt; color:var(--ink2); max-width:130mm; line-height:2; }
+  .cover-rule{ height:5px; width:74px; background:var(--blue); border-radius:4px; margin:26px 0; }
+  .cover-facts{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:6px; max-width:150mm; }
+  .cover-facts div{ border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; background:#fff; }
+  .cover-facts b{ display:block; font-size:8.6pt; color:var(--ink3); font-weight:700; }
+  .cover-facts span{ font-size:12pt; font-weight:800; color:var(--navy); }
+  .cover-meta{ border-top:1.5px solid var(--line); padding-top:14px; font-size:9.4pt; color:var(--ink3); }
+  .cover-meta b{ color:var(--ink); }
+
+  /* ---------- structure ---------- */
+  h2{
+    font-size:16.5pt; color:var(--navy); margin:0 0 4px; letter-spacing:-.01em;
+    break-after:avoid; padding-bottom:7px; border-bottom:2.5px solid var(--blue);
+  }
+  h2 .num{ color:var(--blue); margin-right:10px; }
+  .sec-lead{ color:var(--ink3); font-size:9.6pt; margin:8px 0 16px; break-after:avoid; }
+  h3{ font-size:12pt; color:var(--navy); margin:20px 0 8px; break-after:avoid; }
+  h3::before{ content:""; display:inline-block; width:4px; height:15px; background:var(--blue);
+              border-radius:2px; margin-right:9px; vertical-align:-2px; }
+  h4{ font-size:10.4pt; color:var(--ink); margin:14px 0 5px; break-after:avoid; }
+  p{ margin:0 0 9px; }
+  ul,ol{ margin:0 0 10px; padding-left:20px; }
+  li{ margin-bottom:4px; }
+  .page-break{ break-before:page; }
+
+  /* ---------- toc ---------- */
+  .toc{ list-style:none; padding:0; margin:14px 0 0; }
+  .toc li{ display:flex; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); align-items:baseline; }
+  .toc .n{ color:var(--blue); font-weight:800; width:24px; flex:none; }
+  .toc .t{ font-weight:700; }
+  .toc .d{ color:var(--ink3); font-size:9pt; margin-left:auto; text-align:right; max-width:84mm; }
+
+  /* ---------- numbered steps ---------- */
+  .steps{ list-style:none; padding:0; margin:8px 0 14px; counter-reset:s; }
+  .steps > li{ counter-increment:s; position:relative; padding:0 0 10px 36px; margin:0; break-inside:avoid; }
+  .steps > li::before{ content:counter(s); position:absolute; left:0; top:1px;
+    width:24px; height:24px; line-height:24px; text-align:center; border-radius:50%;
+    background:var(--blue); color:#fff; font-weight:800; font-size:10pt; }
+  .steps > li > b:first-child{ color:var(--navy); }
+
+  /* ---------- steps with phone shots ---------- */
+  .step{ display:grid; grid-template-columns:1fr 42mm; gap:14px; align-items:start;
+         break-inside:avoid; margin:0 0 12px; }
+  .step-body{ min-width:0; }
+  .step-num{ display:inline-flex; align-items:center; justify-content:center;
+    width:23px; height:23px; border-radius:50%; background:var(--blue); color:#fff;
+    font-size:10pt; font-weight:800; margin-right:9px; vertical-align:-5px; }
+  .step h4{ margin:0 0 6px; font-size:11pt; }
+  .step p{ font-size:9.6pt; margin:0 0 6px; }
+  .shot img{ width:100%; display:block; border:1px solid var(--line); border-radius:9px; }
+  .cap{ font-size:8.2pt; color:var(--ink3); margin-top:5px; line-height:1.55; }
+  .phone-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px; break-inside:avoid; margin:12px 0 16px; }
+  .phone-row img{ width:100%; display:block; border:1px solid var(--line); border-radius:9px; }
+
+  /* ---------- callouts ---------- */
+  .note{ border-left:4px solid var(--blue); background:var(--soft); padding:9px 13px;
+         border-radius:0 8px 8px 0; margin:10px 0; font-size:9.2pt; break-inside:avoid; }
+  .note.warn{ border-left-color:var(--orange); background:#fff7ed; }
+  .note.danger{ border-left-color:var(--red); background:#fef2f2; }
+  .note.ok{ border-left-color:var(--green); background:#f0fdf4; }
+  .note .lbl{ display:block; font-weight:800; font-size:9pt; margin-bottom:3px; letter-spacing:.02em; color:var(--blue); }
+  .note.warn .lbl{ color:var(--orange); }
+  .note.danger .lbl{ color:var(--red); }
+  .note.ok .lbl{ color:var(--green); }
+
+  /* ---------- code / values ---------- */
+  code, .mono{ font-family:"DejaVu Sans Mono","Noto Sans Mono CJK JP",monospace; font-size:8.9pt; }
+  code{ background:#eef2f9; border-radius:4px; padding:1px 5px; }
+  .box{ font-family:"DejaVu Sans Mono","Noto Sans Mono CJK JP",monospace; font-size:9pt; line-height:1.7;
+        background:#0f172a; color:#e2e8f0; border-radius:9px; padding:10px 13px; margin:8px 0 12px;
+        word-break:break-all; white-space:pre-wrap; break-inside:avoid; }
+  .box .hl{ color:#fbbf24; font-weight:700; }
+  .box .cm{ color:#94a3b8; }
+  kbd{ background:#fff; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px;
+       padding:0 6px; font-size:8.8pt; font-weight:700; font-family:inherit; white-space:nowrap; }
+
+  /* ---------- tables ---------- */
+  table{ width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:9.2pt; break-inside:avoid; }
+  th,td{ border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; }
+  th{ background:var(--soft); font-weight:800; color:var(--navy); }
+  td.c,th.c{ text-align:center; }
+  .must{ color:var(--red); font-weight:800; }
+  .auto{ color:var(--green); font-weight:800; }
+
+  /* ---------- diagram ---------- */
+  .diagram{ display:grid; grid-template-columns:1fr 26px 1fr 26px 1fr; align-items:center; gap:0;
+            margin:14px 0 6px; break-inside:avoid; }
+  .node{ border:2px solid var(--line); border-radius:14px; padding:12px 10px 10px; text-align:center; background:#fff; min-height:118px; }
+  .node .ic{ font-size:24px; line-height:1.2; }
+  .node b{ display:block; color:var(--navy); font-size:10.6pt; margin:4px 0 2px; }
+  .node span{ display:block; font-size:8.4pt; color:var(--ink3); line-height:1.55; }
+  .node.blue{ border-color:#bfdbfe; background:#f5f9ff; }
+  .node.green{ border-color:#bbf7d0; background:#f6fef8; }
+  .node.purple{ border-color:#ddd6fe; background:#faf8ff; }
+  .arrow{ text-align:center; color:var(--ink3); font-size:16px; font-weight:800; }
+  .diagram-under{ display:grid; grid-template-columns:1fr 26px 1fr 26px 1fr; font-size:8.2pt; color:var(--ink3); text-align:center; margin-bottom:12px; }
+
+  /* ---------- worksheet ---------- */
+  .sheet td{ height:30px; }
+  .sheet th{ width:34%; }
+  .check{ list-style:none; padding:0; margin:6px 0 12px; }
+  .check li{ padding:4px 0 4px 26px; position:relative; border-bottom:1px dashed var(--line); }
+  .check li::before{ content:""; position:absolute; left:2px; top:9px; width:13px; height:13px; border:1.6px solid var(--ink3); border-radius:3px; }
+  .qa{ break-inside:avoid; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--line); }
+  .qa .q{ font-weight:800; color:var(--navy); margin-bottom:4px; }
+  .qa .q::before{ content:"Q"; display:inline-block; width:19px; height:19px; line-height:19px;
+    text-align:center; border-radius:50%; background:var(--navy); color:#fff; font-size:8.6pt; margin-right:8px; }
+  .qa .a{ font-size:9.5pt; padding-left:27px; }
+  .qa .a p{ margin:0 0 5px; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-badge">🏪</div>
+    <h1>FES POS<br>セットアップ手順書</h1>
+    <div class="sub">文化祭の物販レジを、自分たちのクラスで使えるようにする</div>
+    <div class="cover-rule"></div>
+    <p class="lead">
+      スマホがそのままレジになるシステム「FES POS」を、あなたのクラス用に用意する手順です。<br>
+      プログラミングは必要ありません。インターネットのサービスに登録して、画面の指示どおりに
+      入力・コピーしていくだけです。
+    </p>
+    <div class="cover-facts">
+      <div><b>かかる時間</b><span>1〜2時間</span></div>
+      <div><b>費用</b><span>0円（無料プラン）</span></div>
+      <div><b>必要なもの</b><span>パソコン・メール</span></div>
+    </div>
+  </div>
+  <div class="cover-meta">
+    <b>この手順書を読む人</b> — 自分のクラスで FES POS を使いたい人（ふつうは管理者になる人）。<br>
+    <b>使い方の説明</b>は別の「操作説明書」、<b>当日の故障への対応</b>は「障害対応手順書」にあります（どちらも <code>docs</code> フォルダのPDF）。
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<h2>目次</h2>
+<ul class="toc">
+  <li><span class="n">1</span><span class="t">しくみ</span><span class="d">3つの無料サービスで動いています</span></li>
+  <li><span class="n">2</span><span class="t">はじめる前に決めること</span><span class="d">名簿・管理者・合言葉・店の名前</span></li>
+  <li><span class="n">3</span><span class="t">GitHub：プログラムを自分用にコピー</span><span class="d">約10分</span></li>
+  <li><span class="n">4</span><span class="t">TiDB Cloud：データの保管場所を作る</span><span class="d">約15分</span></li>
+  <li><span class="n">5</span><span class="t">Render：アプリを動かす</span><span class="d">約20分（待ち時間を含む）</span></li>
+  <li><span class="n">6</span><span class="t">管理者のはじめてのログイン</span><span class="d">約5分</span></li>
+  <li><span class="n">7</span><span class="t">メンバーに入ってもらう</span><span class="d">1人1分ほど</span></li>
+  <li><span class="n">8</span><span class="t">お店の準備</span><span class="d">商品・在庫・会計係・報告書・練習</span></li>
+  <li><span class="n">9</span><span class="t">文化祭が終わったら</span><span class="d">締め・データの保存</span></li>
+  <li><span class="n">10</span><span class="t">次の年・ほかのクラスで使うとき</span><span class="d">引き継ぎの方法</span></li>
+  <li><span class="n">11</span><span class="t">困ったとき</span><span class="d">よくある質問</span></li>
+  <li><span class="n">12</span><span class="t">設定の一覧と用語</span><span class="d">記入シート付き</span></li>
+</ul>
+
+<div class="note warn" style="margin-top:22px">
+  <span class="lbl">画面の表示について</span>
+  GitHub・TiDB Cloud・Render の画面は英語で、ボタンの名前や位置は会社の都合で変わることがあります。
+  この手順書と少し違っていても、<b>同じ意味のボタン</b>を探して進めてください。この手順書は2026年10月時点の画面をもとに書いています。
+</div>
+
+<div class="note danger">
+  <span class="lbl">ひみつにするもの</span>
+  これから出てくる <b>合言葉</b>・<b>データベースの接続先（パスワード入り）</b>・<b>管理者の復旧コード</b>・<b>名簿</b>は、
+  人に見せない、SNSやグループチャットに貼らない、GitHubに書かない、を守ってください。
+  特に接続先と復旧コードは、知られると売上のデータを書き換えられてしまいます。
+</div>
+
+<!-- ============ 1 ============ -->
+<div class="page-break"></div>
+<h2><span class="num">1</span>しくみ</h2>
+<p class="sec-lead">FES POS は、3つの無料サービスを組み合わせて動いています。それぞれにアカウントを作って、つなげていきます。</p>
+
+<div class="diagram">
+  <div class="node purple"><div class="ic">📦</div><b>GitHub</b><span>プログラム（アプリの設計図）を置いておく場所</span></div>
+  <div class="arrow">→</div>
+  <div class="node blue"><div class="ic">⚙️</div><b>Render</b><span>プログラムを動かして、アプリをインターネットに公開する場所</span></div>
+  <div class="arrow">⇄</div>
+  <div class="node green"><div class="ic">🗄️</div><b>TiDB Cloud</b><span>売上・在庫・PINなどのデータを保存しておく場所</span></div>
+</div>
+<div class="diagram-under"><div>3章で用意</div><div></div><div>5章で用意</div><div></div><div>4章で用意</div></div>
+
+<p>みんなのスマホは、ブラウザ（Safari や Chrome）で <b>Render のアドレス</b>（例：<code>https://fes-pos-abcd.onrender.com</code>）を開いて使います。
+アプリをインストールする必要はありません。</p>
+
+<h3>無料プランについて（2026年時点）</h3>
+<table>
+  <tr><th style="width:22%">サービス</th><th>無料でできること</th><th style="width:34%">気をつけること</th></tr>
+  <tr><td>GitHub</td><td>プログラムを置いておける（自分だけが見られる「Private」でよい）</td><td>特になし</td></tr>
+  <tr><td>Render</td><td>アプリを1つ動かせる（月750時間・通信は月5GBまで）。このシステムなら2日間の文化祭で数百MB程度</td><td><b>15分だれも使わないと休止</b>し、次に開いたとき動き出すまで<b>約1分</b>かかる</td></tr>
+  <tr><td>TiDB Cloud</td><td>データベースを作れる（保存は5GiB・処理は月5000万RUまで）。このシステムの使用量は、その数%程度</td><td>特になし</td></tr>
+</table>
+
+<div class="note">
+  <span class="lbl">文化祭当日の注意</span>
+  Render は使われていないと休止するので、<b>開店の5〜10分前に、だれか1人がアプリを開いておいてください</b>。
+  営業中はみんなのスマホが自動で通信し続けるので、休止しません。
+</div>
+
+<h3>このシステムでできること</h3>
+<ul>
+  <li><b>レジ</b> — 商品をタップして会計。お釣りの計算、注文番号の発行</li>
+  <li><b>受け渡し</b> — 会計した注文が、商品を渡す係のスマホに数秒で表示される</li>
+  <li><b>在庫</b> — 全員のスマホで残りの数が同じになる。2日目の分を先に登録しておける</li>
+  <li><b>現金の管理</b> — 釣り銭の登録、売上の回収、締め（数えた現金との差額）</li>
+  <li><b>売上の集計</b> — 売上・利益・商品別の数。CSVでダウンロード、学校提出用の報告書をPDFで出力</li>
+  <li><b>練習</b> — 本番と同じ画面で練習して、あとで練習の記録だけをまとめて消せる</li>
+</ul>
+
+<!-- ============ 2 ============ -->
+<div class="page-break"></div>
+<h2><span class="num">2</span>はじめる前に決めること</h2>
+<p class="sec-lead">5章で入力する4つのことを、先に決めておきます。12章の記入シートに書いておくと楽です（ひみつのものは書かないでください）。</p>
+
+<h3>① 名簿（番号と名前）</h3>
+<p>レジを使う人全員の<b>番号</b>と<b>名前</b>です。番号は、ログインのときに入力する数字で、<b>4けた</b>がおすすめです
+（例：2年3組1番 → <code>2301</code>）。名前は画面の表示や記録に使います。</p>
+<p>書き方は、<b>「番号:名前」を「,」（カンマ）でつなげる</b>だけです。</p>
+<div class="box">2301:見本 一郎,2302:見本 花子,2303:見本 次郎,2304:見本 桜</div>
+<ul>
+  <li>「:」「,」は全角（：、，）でも大丈夫です。名前の中のスペースはそのまま使えます</li>
+  <li>同じ番号を2回書かないでください</li>
+</ul>
+<div class="note">
+  <span class="lbl">40人分を手で打つのが大変なとき（Excel・Googleスプレッドシート）</span>
+  A列に番号、B列に名前を入れて、C1に <code>=A1&amp;":"&amp;B1</code> と入れて下までコピーします。
+  空いているセルに <code>=TEXTJOIN(",",TRUE,C1:C40)</code> と入れると、1行につながった名簿ができます。それをコピーして使います。
+</div>
+
+<h3>② 管理者の番号</h3>
+<p>管理者は、商品の登録・PINの承認・売上の管理などができる人です。名簿にある番号の中から <b>1人か2人</b> 決めます。
+2人なら <code>2301,2302</code> のように書きます。</p>
+
+<h3>③ 合言葉</h3>
+<p>アプリを開くと最初に聞かれる言葉です。クラスの人だけに教えます。外の人が入ってこられないようにするためのものなので、
+<b>推測されにくいもの</b>にしてください（クラス名や「password」などは避ける。例：<code>sakura-2027</code> のように、言葉と数字を組み合わせる）。</p>
+
+<h3>④ 店の名前</h3>
+<p>ログイン画面に表示される名前です（例：<code>経高祭 2年3組</code>）。合言葉を入れた人にだけ見えます。</p>
+
+<div class="note ok">
+  <span class="lbl">ここまでのまとめ</span>
+  名簿（<code>2301:見本 一郎,…</code>）・管理者の番号（<code>2301</code>）・合言葉・店の名前、の4つが決まったら次へ進みます。
+</div>
+
+<!-- ============ 3 ============ -->
+<div class="page-break"></div>
+<h2><span class="num">3</span>GitHub：プログラムを自分用にコピー</h2>
+<p class="sec-lead">先輩が用意した「テンプレート」から、あなた専用のコピー（リポジトリ）を作ります。中身は自動でコピーされるので、ファイルを触る必要はありません。</p>
+
+<ol class="steps">
+  <li><b>GitHub のアカウントを作る</b><br>
+    <code>https://github.com</code> を開き、<kbd>Sign up</kbd> からメールアドレスで登録します（無料）。すでに持っていればログインします。</li>
+  <li><b>テンプレートを見られるようにしてもらう</b><br>
+    テンプレートが「Private（非公開）」の場合は、持ち主（先輩や先生）にGitHubのユーザー名を伝えて、招待してもらいます。
+    届いたメールの <kbd>View invitation</kbd> → <kbd>Accept invitation</kbd> を押します。公開されている場合は、この手順はいりません。</li>
+  <li><b>テンプレートのページを開く</b><br>
+    持ち主から教えてもらったアドレスを開きます（例：<code>https://github.com/snapdragon0106/fes-pos-template</code>）。</li>
+  <li><b>自分用のコピーを作る</b><br>
+    緑色の <kbd>Use this template</kbd> → <kbd>Create a new repository</kbd> を押します。</li>
+  <li><b>名前と公開範囲を決める</b><br>
+    <b>Owner</b>：自分のアカウント ／ <b>Repository name</b>：好きな名前（例：<code>fes-pos-2027</code>）／
+    公開範囲は <kbd>Private</kbd> を選び、<kbd>Create repository</kbd> を押します。</li>
+</ol>
+
+<div class="note ok">
+  <span class="lbl">できあがり</span>
+  <code>https://github.com/あなたのユーザー名/fes-pos-2027</code> のようなページができ、ファイルがたくさん並んでいれば成功です。
+  このページは5章で使います。
+</div>
+
+<div class="note">
+  <span class="lbl">「Use this template」のボタンが無いとき</span>
+  テンプレートとして設定されていないか、見る権限がありません。持ち主に「Template repository として設定されているか」「自分が招待されているか」を確認してもらってください（10章の「テンプレートの持ち主へ」）。
+</div>
+
+<!-- ============ 4 ============ -->
+<div class="page-break"></div>
+<h2><span class="num">4</span>TiDB Cloud：データの保管場所を作る</h2>
+<p class="sec-lead">売上や在庫を保存するデータベースを作り、その「接続先」（住所とパスワードをまとめた1行の文字）を作ります。</p>
+
+<ol class="steps">
+  <li><b>アカウントを作る</b><br>
+    <code>https://tidbcloud.com</code> を開き、<kbd>Sign Up</kbd> から登録します。Googleアカウントでも登録できます。
+    最初にいくつか質問が出たら、適当に答えて進めてかまいません。</li>
+  <li><b>クラスタ（データベースの入れ物）を作る</b><br>
+    <kbd>Create Cluster</kbd> を押し、次のように選んで <kbd>Create</kbd> を押します。30秒ほどでできあがります。
+    <ul style="margin-top:4px">
+      <li>プラン：<b>Starter</b>（無料。最初から選ばれています）</li>
+      <li>場所（Region）：<b>Tokyo (ap-northeast-1)</b>（日本に近いほど速い）</li>
+      <li>名前：何でもよい（例：<code>fes-pos</code>）</li>
+    </ul>
+  </li>
+  <li><b>接続の画面を開く</b><br>
+    できたクラスタの名前を押し、右上の <kbd>Connect</kbd> を押します。<br>
+    <b>Connection Type</b> は <kbd>Public</kbd>、<b>Connect With</b> は <kbd>General</kbd> のままにします。</li>
+  <li><b>パスワードを作る</b><br>
+    <kbd>Generate Password</kbd>（パスワードを作る）を押します。<b>パスワードはこのときしか表示されない</b>ので、
+    すぐにメモ帳などにコピーしておきます（忘れたら <kbd>Reset Password</kbd> で作り直せます）。</li>
+  <li><b>3つの値をメモする</b><br>
+    画面に出ている <b>HOST</b>（<code>gateway01.ap-northeast-1.prod.aws.tidbcloud.com</code> のような長い文字）、
+    <b>USERNAME</b>（<code>xxxxxxxx.root</code> のような文字）、<b>PASSWORD</b> の3つをメモします。<b>PORT</b> はふつう <code>4000</code> です。</li>
+</ol>
+
+<h3>接続先を組み立てる</h3>
+<p>メモした値を、次の形に当てはめて1行にします。<b>これが「接続先」（DATABASE_URL）</b>です。</p>
+<div class="box">mysql://<span class="hl">USERNAME</span>:<span class="hl">PASSWORD</span>@<span class="hl">HOST</span>:4000/fespos</div>
+<p>例（実際の値は人によって違います）：</p>
+<div class="box">mysql://3xYzAbcDeF.root:aB3dE6gH9jK2mN5p@gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/fespos</div>
+<ul>
+  <li>最後の <code>fespos</code> は、データベースの名前です。<b>まだ無くても大丈夫です</b>（アプリが最初に起動したとき自動で作ります）</li>
+  <li><code>:</code>（コロン）と <code>@</code>（アットマーク）の位置をまちがえないようにしてください。パスワードに <code>@ : / ? # %</code> などの記号が入っていると読めないので、<kbd>Reset Password</kbd> で作り直してください</li>
+  <li>暗号化の設定は、アプリが自動で付けます。TiDB Cloud の別の画面に出ている <code>?ssl=…</code> 付きの文字を使ってもかまいません</li>
+  <li><b>接続先にはパスワードが入っているので、人に見せないでください。</b>5章で Render に貼り付けたら、メモは消してかまいません</li>
+</ul>
+
+<!-- ============ 5 ============ -->
+<div class="page-break"></div>
+<h2><span class="num">5</span>Render：アプリを動かす</h2>
+<p class="sec-lead">3章のリポジトリを Render につなげて、アプリを動かします。設定はリポジトリに入っている設計図（<code>render.yaml</code>）が自動で読み込むので、入力するのは5か所だけです。</p>
+
+<ol class="steps">
+  <li><b>アカウントを作る</b><br>
+    <code>https://render.com</code> を開き、<kbd>Get Started</kbd> → <kbd>GitHub</kbd> を選んで、GitHub のアカウントで登録します。
+    「Render に GitHub へのアクセスを許可しますか」と聞かれたら許可します。</li>
+  <li><b>Blueprint（設計図）から作る</b><br>
+    Render の画面の右上の <kbd>New ＋</kbd> → <kbd>Blueprint</kbd> を押します。</li>
+  <li><b>リポジトリを選ぶ</b><br>
+    3章で作ったリポジトリ（例：<code>fes-pos-2027</code>）の <kbd>Connect</kbd> を押します。<br>
+    一覧に出てこないときは、<kbd>Configure account</kbd>（または <kbd>Connect GitHub</kbd>）から、Render がそのリポジトリを見られるように許可します。</li>
+  <li><b>名前を付ける</b><br>
+    <b>Blueprint Name</b> に好きな名前（例：<code>fes-pos</code>）を入れます。<b>Branch</b> は <code>main</code> のままです。</li>
+  <li><b>5つの値を入れる</b><br>
+    画面に入力欄が出るので、2章と4章で用意したものを入れます。</li>
+</ol>
+
+<table>
+  <tr><th style="width:30%">入力欄の名前</th><th>入れるもの</th><th style="width:30%">例</th></tr>
+  <tr><td><code>DATABASE_URL</code></td><td>4章で組み立てた接続先</td><td><code>mysql://…:4000/fespos</code></td></tr>
+  <tr><td><code>POS_MEMBERS</code></td><td>名簿（番号:名前 をカンマでつなげたもの）</td><td><code>2301:見本 一郎,2302:見本 花子</code></td></tr>
+  <tr><td><code>POS_ADMIN_IDS</code></td><td>管理者の番号</td><td><code>2301</code></td></tr>
+  <tr><td><code>POS_ACCESS_CODE</code></td><td>合言葉</td><td><code>sakura-2027</code></td></tr>
+  <tr><td><code>POS_SHOP_NAME</code></td><td>店の名前</td><td><code>経高祭 2年3組</code></td></tr>
+</table>
+<p><code>JWT_SECRET</code> と <code>POS_ADMIN_RECOVERY_CODE</code> は、Render が自動で作るので入力しなくてかまいません（入力欄が出ない場合もあります）。</p>
+
+<ol class="steps" style="counter-reset:s 5">
+  <li><b>作る</b><br>
+    いちばん下の <kbd>Deploy Blueprint</kbd>（または <kbd>Apply</kbd>）を押します。プランが <b>Free</b> になっていることを確認してください。</li>
+  <li><b>待つ（5〜10分）</b><br>
+    左の一覧の <b>fes-pos</b> を押すと、作業の様子（ログ）が流れます。<b>Live</b>（緑）になれば完成です。</li>
+  <li><b>アドレスを確かめる</b><br>
+    サービスの画面の上のほうに出ている <code>https://fes-pos-xxxx.onrender.com</code> が、<b>アプリのアドレス</b>です。
+    これをクラスのみんなに伝えます（合言葉とは別に伝えるのがおすすめ）。</li>
+</ol>
+
+<div class="note warn">
+  <span class="lbl">「Deploy failed」（失敗）になったとき</span>
+  ほとんどは入力した値のまちがいです。サービスの画面の <kbd>Logs</kbd> を開くと、<b>日本語で直す場所が書いてあります</b>
+  （例：「POS_MEMBERS の「…」が読めません」）。左の <kbd>Environment</kbd> で値を直して <kbd>Save Changes</kbd> を押すと、もう一度作り直されます。
+  くわしくは11章。
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 style="margin-top:26px"><span class="num">6</span>管理者のはじめてのログイン</h2>
+<p class="sec-lead">新しいお店には、まだ誰のPIN（4けたの暗証番号）もありません。管理者だけは、Render が作った「復旧コード」を使って最初のPINを決めます。</p>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">1</span>アドレスを開いて合言葉を入れる</h4>
+    <p>スマホかパソコンで、5章のアドレスを開きます。合言葉を入れて <kbd>入場する</kbd> を押します。</p>
+    <p>開くまで1分ほどかかることがあります（休止からの起動）。</p>
+  </div>
+  <div class="shot"><img src="images/s01-gate.jpg" alt=""><div class="cap">最初に出る合言葉の画面</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">2</span>自分の番号を入れる</h4>
+    <p>管理者の番号を入れて <kbd>次へ</kbd> を押します。</p>
+    <p>上に<b>店の名前</b>が出ていれば、設定が正しく読み込まれています。</p>
+  </div>
+  <div class="shot"><img src="images/s02-id.jpg" alt=""><div class="cap">店の名前（例：経高祭 2年3組）が表示される</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">3</span>「管理者の復旧コードを使う」を押す</h4>
+    <p>PINを決める画面が出ますが、<b>ここではPINを入れずに</b>、下の青い文字 <b>管理者の復旧コードを使う</b> を押します。</p>
+    <p class="cap">ここでPINを設定すると「承認待ち」になり、承認できる人がいないので使えません（そうなっても、復旧コードを使えばやり直せます）。</p>
+  </div>
+  <div class="shot"><img src="images/s03-admin-first.jpg" alt=""><div class="cap">いちばん下の「管理者の復旧コードを使う」</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">4</span>復旧コードとPINを入れる</h4>
+    <p>復旧コードは Render にあります。Render のサービスの画面の左にある <kbd>Environment</kbd> を開き、
+    <code>POS_ADMIN_RECOVERY_CODE</code> の値（目のマークで表示）をコピーします。</p>
+    <p>それを「復旧コード」に貼り付け、<b>新しいPIN</b>（4けた）を2回入れて <kbd>PINを設定する</kbd> を押します。</p>
+    <p class="cap">1234・0000・1111・生まれ年のような推測されやすいPINは使えません。</p>
+  </div>
+  <div class="shot"><img src="images/s04-recover.jpg" alt=""><div class="cap">復旧コードと新しいPIN</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">5</span>レジの画面が出たら完了</h4>
+    <p>右上に自分の番号と「管理者」が出ていれば成功です。次からは、番号とPINだけで入れます。</p>
+    <p>まだ商品が無いので、レジには案内だけが出ています。商品は8章で登録します。</p>
+  </div>
+  <div class="shot"><img src="images/s05-empty-register.jpg" alt=""><div class="cap">管理者でログインしたところ</div></div>
+</div>
+
+<div class="note">
+  <span class="lbl">後片付け（おすすめ）</span>
+  使い終わった復旧コードは消しておくと安全です。Render の <kbd>Environment</kbd> で <code>POS_ADMIN_RECOVERY_CODE</code> の
+  ごみ箱マークを押し、<kbd>Save Changes</kbd> を押します（アプリが1〜2分で再起動します）。<br>
+  あとで管理者がPINを忘れたときは、同じ名前で、16文字以上のでたらめな英数字を新しく追加すれば、もう一度この手順が使えます。
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 style="margin-top:26px"><span class="num">7</span>メンバーに入ってもらう</h2>
+<p class="sec-lead">クラスのみんなは、自分でPINを決めて申請し、管理者が承認すると使えるようになります。成り済ましを防ぐため、承認は<b>本人の画面に出るコード</b>で行います。</p>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">1</span>メンバー：PINを決めて申請する</h4>
+    <p>アドレスを開き、合言葉 → 自分の番号を入れます。はじめてのときは「初回ログイン」と出るので、
+    自分で決めたPINを2回入れて <kbd>PINを設定する</kbd> を押します。</p>
+  </div>
+  <div class="shot"><img src="images/s06-member-pin.jpg" alt=""><div class="cap">メンバーのはじめてのログイン</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">2</span>メンバー：申請コードを管理者に見せる</h4>
+    <p>4文字の<b>申請コード</b>が出ます。この画面を管理者に見せます（写真やチャットで送るより、直接見せるのが確実です）。</p>
+  </div>
+  <div class="shot"><img src="images/s07-request-code.jpg" alt=""><div class="cap">4文字の申請コード</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">3</span>管理者：PINタブで承認する</h4>
+    <p>管理者は下の <b>PIN</b> タブを開きます。「承認待ち」に本人の番号と名前が出ているので、本人の画面のコードを入れて <kbd>承認</kbd> を押します。</p>
+    <p>そのあとメンバーは、番号とPINで入れるようになります。</p>
+    <p class="cap">コードが合わない申請は承認できません。覚えのない申請は <kbd>却下</kbd> してください。</p>
+  </div>
+  <div class="shot"><img src="images/s08-approve.jpg" alt=""><div class="cap">承認待ちにコードを入れて承認</div></div>
+</div>
+
+<div class="note">
+  <span class="lbl">人数が多いとき</span>
+  ホームルームなどで、全員に同時にアドレスを開いてもらい、順番に管理者が承認すると早く終わります。
+  PINを忘れた人は、管理者が PIN タブでリセットできます。
+</div>
+<div class="note">
+  <span class="lbl">ホーム画面に追加すると便利</span>
+  iPhone は Safari の共有ボタン → <kbd>ホーム画面に追加</kbd>、Android は Chrome の右上 <kbd>︙</kbd> → <kbd>ホーム画面に追加</kbd>。
+  アプリのように1タップで開けます。
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 style="margin-top:26px"><span class="num">8</span>お店の準備</h2>
+<p class="sec-lead">管理者が、商品・在庫・係などを準備します。どれも、あとから何度でも直せます。</p>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">1</span>商品を登録する（商品タブ → 追加）</h4>
+    <ul>
+      <li><b>販売価格</b>：お客さんが払う値段。お釣りが楽になるので、100円単位がおすすめ</li>
+      <li><b>原価</b>：1個あたりの仕入れ値（仕入れた金額 ÷ 個数）。利益の計算だけに使います</li>
+      <li><b>初期在庫</b>：1日目に売る数</li>
+      <li><b>日付を指定して追加する在庫</b>：2日目の分など。日付と個数を入れると、<b>その日の0時に自動で</b>在庫に加わります（1日目の売れ残りも持ち越されます）</li>
+      <li><b>警告閾値</b>：残りがこの数以下になると「残りわずか」と出ます</li>
+      <li><b>画像</b>：写真を選ぶと、絵文字の代わりに表示されます</li>
+    </ul>
+  </div>
+  <div class="shot"><img src="images/s09-product-form.jpg" alt=""><div class="cap">商品の追加。2日目の分を日付指定で入れているところ</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">2</span>在庫を確かめる（在庫タブ）</h4>
+    <p>「残」が今日売れる数、青い札（例：<b>10/4から +78</b>）がその日に加わる数です。<br>
+    <b>手元にある実物の数 ＝「残」＋ 青い札の数</b> なので、仕入れた数と合っているか確かめます。</p>
+    <p>日付を指定した在庫は、その日になる前なら × で取り消せます。今日の日付で登録すると、すぐに売れる在庫になるので注意してください。</p>
+  </div>
+  <div class="shot"><img src="images/s10-inventory.jpg" alt=""><div class="cap">在庫タブ</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">3</span>報告書の設定（会計タブ）</h4>
+    <p>学校に出す収支報告書（仕入帳・売上帳・物品販売報告書）の<b>行事名・団体名・仕入代金の借入金</b>を入れて <kbd>保存</kbd> を押します。
+    報告書の日付は自動で入ります。</p>
+    <p>仕入れたものは「仕入帳」に、保菌検査代などは「控除費目」に記録しておくと、最後に <kbd>PDF出力</kbd> でまとめて印刷できます。</p>
+  </div>
+  <div class="shot"><img src="images/s11-report-settings.jpg" alt=""><div class="cap">会計タブの設定欄</div></div>
+</div>
+
+<div class="step">
+  <div class="step-body">
+    <h4><span class="step-num">4</span>練習する（商品タブの「練習」）</h4>
+    <p><kbd>練習用の商品を追加</kbd> を押すと、¥100 の練習用の商品が3つ入ります。みんなで会計・受け渡し・取消などを練習します。</p>
+    <p>終わったら <kbd>練習を片付ける</kbd> を押すと、練習の会計がまとめて消え、売上や在庫は練習の前に戻ります。
+    <b>本番の前に必ず片付けてください。</b></p>
+  </div>
+  <div class="shot"><img src="images/s12-practice-card.jpg" alt=""><div class="cap">商品タブのいちばん上の「練習」</div></div>
+</div>
+
+<h3>そのほかの準備</h3>
+<ul class="check">
+  <li><b>会計係を決める</b>（PINタブの「会計係」）— 管理者のほかに、釣り銭の登録・締めができる人</li>
+  <li><b>操作説明書と障害対応手順書を印刷して配る</b>（<code>docs</code> フォルダのPDF。障害対応手順書の最後に、アドレスを書く欄があります）</li>
+  <li><b>本番の前日までに通し練習</b>（スマホ2台以上で同時に会計・受け渡し・取消を試す）</li>
+  <li><b>当日の朝</b>：開店の5〜10分前にアプリを開く → 売上タブで<b>釣り銭を登録</b> → 営業開始</li>
+</ul>
+
+<!-- ============ 9 ============ -->
+<div class="page-break"></div>
+<h2><span class="num">9</span>文化祭が終わったら</h2>
+<ol class="steps">
+  <li><b>締め</b>（売上タブ・管理者か会計係）<br>
+    レジの現金を金種ごとに数えて入力します。合わなくても無理に合わせず、そのまま記録します。</li>
+  <li><b>釣り銭を返す</b>（最終日だけ）<br>
+    用意した釣り銭を返したら、<kbd>釣り銭を返す</kbd> で記録します。2日目も同じお金を使うなら、返さずに次の日の朝また釣り銭を登録します。</li>
+  <li><b>データを保存する</b><br>
+    売上タブの <kbd>取引明細</kbd> と <kbd>商品別集計</kbd> でCSV（Excelで開ける）をダウンロードします。
+    会計タブの <kbd>PDF出力</kbd> で、学校提出用の報告書を保存・印刷します。</li>
+  <li><b>そのあと</b><br>
+    アプリはそのまま置いておいても、無料の範囲なので費用はかかりません。使わなくなったら、Render のサービスの <kbd>Settings</kbd> → いちばん下の
+    <kbd>Delete Web Service</kbd> で止められます（データは TiDB Cloud に残ります）。</li>
+</ol>
+
+<!-- ============ 10 ============ -->
+<h2 style="margin-top:22px"><span class="num">10</span>次の年・ほかのクラスで使うとき</h2>
+<p class="sec-lead">2つの方法があります。<b>おすすめは A</b> です。</p>
+
+<h3>A. 新しく作る（おすすめ）</h3>
+<p>次の年のクラスが、自分たちのアカウントで<b>この手順書の2章から</b>やり直します。テンプレートから新しいリポジトリを作るので、
+前の年のデータや設定は一切入りません。前の年の人のアカウントにも頼りません。</p>
+
+<h3>B. 同じ Render と TiDB Cloud を使い続ける</h3>
+<p>先生など同じ人がアカウントを管理し続ける場合の方法です。Render の <kbd>Environment</kbd> で次を変えて <kbd>Save Changes</kbd> を押すだけです。</p>
+<table>
+  <tr><th style="width:32%">変えるもの</th><th>どう変えるか</th></tr>
+  <tr><td><code>DATABASE_URL</code></td><td><b>最後の名前だけ</b>変える（例：<code>/fespos</code> → <code>/fespos2027</code>）。新しい空のデータベースで始まります。去年のデータは前の名前のまま残ります</td></tr>
+  <tr><td><code>POS_MEMBERS</code> ／ <code>POS_ADMIN_IDS</code></td><td>新しいクラスの名簿と管理者</td></tr>
+  <tr><td><code>POS_ACCESS_CODE</code></td><td>新しい合言葉（去年の人が入れないように、必ず変える）</td></tr>
+  <tr><td><code>POS_SHOP_NAME</code></td><td>新しい店の名前</td></tr>
+  <tr><td><code>POS_ADMIN_RECOVERY_CODE</code></td><td>16文字以上のでたらめな英数字を追加。新しい管理者が6章の手順で最初のPINを決めます</td></tr>
+</table>
+<div class="note warn">
+  <span class="lbl">データベースの名前は必ず変える</span>
+  名前を変えずに名簿だけ変えると、去年の売上や、同じ番号の先輩のPINが残ったままになります。
+</div>
+
+<h3>テンプレートの持ち主へ（先輩・先生向け）</h3>
+<p>後輩が3章の「Use this template」を使えるように、GitHub のテンプレートのページで次を確認してください。</p>
+<ul class="check">
+  <li><kbd>Settings</kbd> → <kbd>General</kbd> の <b>Template repository</b> にチェックが入っている</li>
+  <li>後輩を招待する：<kbd>Settings</kbd> → <kbd>Collaborators</kbd> → <kbd>Add people</kbd> → 後輩のGitHubユーザー名</li>
+  <li>卒業する前に、持ち主を先生やクラブのアカウントに移す：<kbd>Settings</kbd> → いちばん下の <kbd>Transfer ownership</kbd>
+    （移さないと、持ち主がいなくなったときに誰も招待できなくなります）</li>
+  <li>公開してもよい場合は <kbd>Settings</kbd> → <kbd>Change visibility</kbd> → <kbd>Public</kbd>。プログラムに名簿や合言葉は入っていないので、
+    公開しても秘密がもれることはありません（招待の手間がなくなります）</li>
+</ul>
+
+<!-- ============ 11 ============ -->
+<h2 style="margin-top:26px"><span class="num">11</span>困ったとき</h2>
+
+<div class="qa"><div class="q">Render が「Deploy failed」になる</div><div class="a">
+  <p>サービスの画面の <kbd>Logs</kbd> を開き、赤い文字や <code>Error</code> の行を探します。次のようなメッセージが出ていたら、
+  <kbd>Environment</kbd> でその値を直して <kbd>Save Changes</kbd> を押します。</p>
+  <table>
+    <tr><th style="width:44%">ログに出る言葉</th><th>原因と直し方</th></tr>
+    <tr><td>POS_MEMBERS の「…」が読めません</td><td>名簿の書き方。「番号:名前」をカンマでつないでいるか確認</td></tr>
+    <tr><td>POS_ADMIN_IDS の … が POS_MEMBERS にありません</td><td>管理者の番号が名簿に無い</td></tr>
+    <tr><td>POS_ACCESS_CODE（合言葉）が設定されていません</td><td>合言葉が空になっている</td></tr>
+    <tr><td><code>Access denied for user</code></td><td>接続先のユーザー名かパスワードがちがう。TiDB Cloud でパスワードを作り直して入れ直す</td></tr>
+    <tr><td><code>getaddrinfo ENOTFOUND</code></td><td>接続先のHOSTがちがう（コピーのし忘れ・余分な文字）</td></tr>
+    <tr><td><code>Health check</code> 〜 <code>timed out</code></td><td>ほとんどは接続先のまちがい。上の2つを確認</td></tr>
+  </table>
+</div></div>
+
+<div class="qa"><div class="q">アドレスを開いても、なかなか表示されない</div><div class="a">
+  <p>無料プランの休止から起き上がるところです。1分ほど待ってから読み込み直してください。営業中はこうなりません。</p>
+</div></div>
+
+<div class="qa"><div class="q">合言葉・名簿・店の名前を変えたい</div><div class="a">
+  <p>Render の <kbd>Environment</kbd> で値を変えて <kbd>Save Changes</kbd> を押すと、1〜2分で反映されます。
+  合言葉を変えると、全員がもう一度合言葉を入れることになります。名簿から外した人は、すぐに使えなくなります。</p>
+</div></div>
+
+<div class="qa"><div class="q">管理者がPINを忘れた</div><div class="a">
+  <p>Render の <kbd>Environment</kbd> で <code>POS_ADMIN_RECOVERY_CODE</code> を追加（16文字以上のでたらめな英数字）して保存し、
+  6章の3〜5の手順でPINを決め直します。終わったら消しておきます。</p>
+</div></div>
+
+<div class="qa"><div class="q">メンバーがPINを忘れた・申請コードが分からなくなった</div><div class="a">
+  <p>PINを忘れた人は、管理者が PIN タブでリセットします。申請コードが分からなくなった人は、もう一度PINを設定すると新しいコードが出ます。</p>
+</div></div>
+
+<div class="qa"><div class="q">練習の記録を消したい／最初からやり直したい</div><div class="a">
+  <p>練習用の商品で練習したなら、商品タブの <kbd>練習を片付ける</kbd> で練習の分だけ消えます。
+  すべて消したいときは、商品タブの <kbd>リセット</kbd>（全データリセット）を使います。商品・売上・在庫・現金の記録・操作ログがすべて消えます（PINと報告書の設定は残ります）。</p>
+</div></div>
+
+<div class="qa"><div class="q">当日、レジが動かなくなった</div><div class="a">
+  <p>「障害対応手順書」（<code>docs</code> フォルダのPDF）に、画面ごとの対応と、紙での営業の方法が書いてあります。前もって印刷しておいてください。</p>
+</div></div>
+
+<div class="qa"><div class="q">キャッシュレス決済（PayPayなど）を使いたい</div><div class="a">
+  <p>決済会社との契約が必要です。準備の方法は <code>docs/cashless-payment.md</code> にあります（くわしい人向け）。設定しなければ現金だけで動きます。</p>
+</div></div>
+
+<!-- ============ 12 ============ -->
+<h2 style="margin-top:26px"><span class="num">12</span>設定の一覧と用語</h2>
+
+<h3>Render の設定（Environment）</h3>
+<table>
+  <tr><th style="width:30%">名前</th><th>意味</th><th class="c" style="width:16%">入力</th></tr>
+  <tr><td><code>DATABASE_URL</code></td><td>データベースの接続先（4章）。最後の名前を変えると、空のデータベースで始まる</td><td class="c must">必要</td></tr>
+  <tr><td><code>POS_MEMBERS</code></td><td>名簿。<code>番号:名前</code> をカンマでつなげる</td><td class="c must">必要</td></tr>
+  <tr><td><code>POS_ADMIN_IDS</code></td><td>管理者の番号（2人ならカンマでつなげる）</td><td class="c must">必要</td></tr>
+  <tr><td><code>POS_ACCESS_CODE</code></td><td>合言葉</td><td class="c must">必要</td></tr>
+  <tr><td><code>POS_SHOP_NAME</code></td><td>店の名前（ログイン画面に表示）</td><td class="c">あるとよい</td></tr>
+  <tr><td><code>JWT_SECRET</code></td><td>ログインの記録に付ける署名の鍵。32文字以上。変えると全員ログインし直し</td><td class="c auto">自動</td></tr>
+  <tr><td><code>POS_ADMIN_RECOVERY_CODE</code></td><td>管理者が最初のPINを決める・忘れたPINを決め直すためのコード。16文字以上。使い終わったら消してよい</td><td class="c auto">自動</td></tr>
+  <tr><td><code>NODE_VERSION</code></td><td>プログラムを動かす道具のバージョン。変えない</td><td class="c auto">自動</td></tr>
+  <tr><td><code>TURNSTILE_SITE_KEY</code><br><code>TURNSTILE_SECRET_KEY</code></td><td>ロボットよけの確認（Cloudflare）を付けるときだけ。2つそろえて設定する</td><td class="c">なくてよい</td></tr>
+</table>
+
+<h3>用語</h3>
+<table>
+  <tr><th style="width:26%">言葉</th><th>意味</th></tr>
+  <tr><td>リポジトリ</td><td>GitHub にあるプログラムの置き場所（フォルダのようなもの）</td></tr>
+  <tr><td>テンプレート</td><td>コピーして使うための元のリポジトリ</td></tr>
+  <tr><td>デプロイ</td><td>プログラムを Render で動かせる状態にすること。設定を変えると自動でやり直される</td></tr>
+  <tr><td>環境変数（Environment）</td><td>Render に入れておく設定の値。名簿や合言葉など、プログラムに書いてはいけないものをここに入れる</td></tr>
+  <tr><td>クラスタ</td><td>TiDB Cloud のデータベースの入れ物</td></tr>
+  <tr><td>接続先（DATABASE_URL）</td><td>データベースの住所・ユーザー名・パスワードをまとめた1行の文字</td></tr>
+  <tr><td>PIN</td><td>1人ずつの4けたの暗証番号</td></tr>
+  <tr><td>復旧コード</td><td>管理者がPINを決めるための長いコード（Render が自動で作る）</td></tr>
+</table>
+
+<h3>記入シート（ひみつのものは書かない）</h3>
+<table class="sheet">
+  <tr><th>GitHub のリポジトリのアドレス</th><td></td></tr>
+  <tr><th>アプリのアドレス（Render）</th><td></td></tr>
+  <tr><th>TiDB Cloud のクラスタの名前</th><td></td></tr>
+  <tr><th>データベースの名前（接続先の最後）</th><td></td></tr>
+  <tr><th>管理者の番号</th><td></td></tr>
+  <tr><th>会計係の番号</th><td></td></tr>
+  <tr><th>各サービスに登録したメールアドレス</th><td></td></tr>
+</table>
+<p class="cap">合言葉・PIN・パスワード・接続先・復旧コードは、この紙に書かないでください。</p>
+
+</body>
+</html>

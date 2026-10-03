@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>FES POS</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#051733" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- iOS Safari doesn't fully honor the Web App Manifest on every
+         version, so these proprietary tags carry the same "installed app"
+         behavior (standalone display, status bar tint, home-screen title)
+         for "Add to Home Screen" specifically. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FES POS" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        if (localStorage.getItem("theme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+      // "Intelligent colour": pick a time-of-day bucket once, before
+      // first paint, so the ambient background wash (light mode only)
+      // starts life already tinted for the time of day rather than
+      // flashing then changing. Never affects the accent colour used
+      // for money/critical actions.
+      try {
+        var h = new Date().getHours();
+        var bucket = h < 6 ? "night" : h < 11 ? "morning" : h < 17 ? "day" : h < 21 ? "evening" : "night";
+        document.documentElement.setAttribute("data-daytime", bucket);
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+
+</html>

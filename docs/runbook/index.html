@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>FES POS 障害対応手順書</title>
+<style>
+  @page { size: A4; margin: 17mm 15mm 20mm; }
+
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --blue:#1d4ed8; --navy:#051733; --green:#15803d; --orange:#ea580c;
+    --red:#dc2626; --purple:#7c3aed;
+    --line:#dbe3ef; --soft:#f1f5fb;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    margin:0; color:var(--ink);
+    font-family:"Noto Sans CJK JP","Noto Sans JP",sans-serif;
+    font-size:10.2pt; line-height:1.85; font-feature-settings:"palt" 1;
+  }
+
+  /* ---------- cover ---------- */
+  .cover{ height:247mm; display:flex; flex-direction:column; break-after:page; position:relative; }
+  .cover-top{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .cover-badge{
+    width:74px; height:74px; border-radius:22px; display:flex; align-items:center; justify-content:center;
+    font-size:38px; background:radial-gradient(circle at 32% 28%,#dbeafe 0%,#bfdbfe 100%);
+    border:1.5px solid #bfdbfe; margin-bottom:22px;
+  }
+  .cover h1{ font-size:40pt; line-height:1.18; margin:0 0 6px; letter-spacing:-.02em; color:var(--navy); }
+  .cover .sub{ font-size:15pt; color:var(--blue); font-weight:700; margin-bottom:26px; }
+  .cover .lead{ font-size:11pt; color:var(--ink2); max-width:118mm; line-height:2; }
+  .cover-rule{ height:5px; width:74px; background:var(--blue); border-radius:4px; margin:26px 0; }
+  .cover-meta{ border-top:1.5px solid var(--line); padding-top:14px; font-size:9.4pt; color:var(--ink3); }
+  .cover-meta b{ color:var(--ink); }
+
+  /* ---------- structure ---------- */
+  h2{
+    font-size:16.5pt; color:var(--navy); margin:0 0 4px; letter-spacing:-.01em;
+    break-after:avoid; padding-bottom:7px; border-bottom:2.5px solid var(--blue);
+  }
+  h2 .num{ color:var(--blue); margin-right:10px; }
+  .sec-lead{ color:var(--ink3); font-size:9.6pt; margin:8px 0 16px; break-after:avoid; }
+  h3{ font-size:12pt; color:var(--navy); margin:20px 0 8px; break-after:avoid; }
+  h3::before{ content:""; display:inline-block; width:4px; height:15px; background:var(--blue);
+              border-radius:2px; margin-right:9px; vertical-align:-2px; }
+  h4{ font-size:10.4pt; color:var(--ink); margin:14px 0 5px; break-after:avoid; }
+  p{ margin:0 0 9px; }
+  .page-break{ break-before:page; }
+  section{ break-inside:auto; }
+
+  /* ---------- toc ---------- */
+  .toc{ list-style:none; padding:0; margin:14px 0 0; }
+  .toc li{ display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); align-items:baseline; }
+  .toc .n{ color:var(--blue); font-weight:800; width:24px; flex:none; }
+  .toc .t{ font-weight:700; }
+  .toc .d{ color:var(--ink3); font-size:9pt; margin-left:auto; text-align:right; max-width:78mm; }
+
+  /* ---------- steps with phone shots ---------- */
+  .step{ display:grid; grid-template-columns:1fr 46mm; gap:13px; align-items:start;
+         break-inside:avoid; margin:0 0 16px; }
+  .step.rev{ grid-template-columns:46mm 1fr; }
+  .step-body{ min-width:0; }
+  .step-num{ display:inline-flex; align-items:center; justify-content:center;
+    width:23px; height:23px; border-radius:50%; background:var(--blue); color:#fff;
+    font-size:10pt; font-weight:800; margin-right:9px; vertical-align:-5px; }
+  .step h4{ margin:0 0 6px; font-size:11pt; }
+  .step p{ font-size:9.6pt; margin:0 0 6px; }
+  .shot img{ width:100%; display:block; border:1px solid var(--line); border-radius:9px; }
+  .cap{ font-size:8.2pt; color:var(--ink3); margin-top:5px; line-height:1.55; }
+
+  figure{ margin:12px 0 16px; break-inside:avoid; }
+  figure img{ width:100%; display:block; border:1px solid var(--line); border-radius:10px; }
+  figure figcaption{ font-size:8.6pt; color:var(--ink3); margin-top:6px; line-height:1.6; }
+  .phone-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px; break-inside:avoid; margin:12px 0 16px; }
+  .phone-row img{ width:100%; display:block; border:1px solid var(--line); border-radius:9px; }
+
+  /* ---------- callouts ---------- */
+  .note{ border-left:4px solid var(--blue); background:var(--soft); padding:11px 14px;
+         border-radius:0 8px 8px 0; margin:12px 0; font-size:9.5pt; break-inside:avoid; }
+  .note.warn{ border-left-color:var(--orange); background:#fff7ed; }
+  .note.danger{ border-left-color:var(--red); background:#fef2f2; }
+  .note .lbl{ display:block; font-weight:800; font-size:9pt; margin-bottom:3px; letter-spacing:.02em; }
+  .note.warn .lbl{ color:var(--orange); }
+  .note.danger .lbl{ color:var(--red); }
+  .note .lbl{ color:var(--blue); }
+
+  /* ---------- tables ---------- */
+  table{ width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:9.3pt; break-inside:avoid; }
+  th,td{ border:1px solid var(--line); padding:7px 9px; text-align:left; vertical-align:top; }
+  th{ background:var(--soft); font-weight:800; color:var(--navy); }
+  td.c,th.c{ text-align:center; }
+
+  .badge{ display:inline-block; padding:1px 8px; border-radius:20px; font-size:8.2pt; font-weight:800; }
+  kbd{ background:#fff; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px;
+       padding:1px 7px; font-size:8.8pt; font-weight:700; font-family:inherit; }
+
+  ul,ol{ margin:0 0 10px; padding-left:20px; }
+  li{ margin-bottom:4px; }
+  .qa{ break-inside:avoid; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+  .qa .q{ font-weight:800; color:var(--navy); margin-bottom:5px; }
+  .qa .q::before{ content:"Q"; display:inline-block; width:19px; height:19px; line-height:19px;
+    text-align:center; border-radius:50%; background:var(--navy); color:#fff; font-size:8.6pt; margin-right:8px; }
+  .qa .a{ font-size:9.6pt; padding-left:27px; }
+  .rules{ list-style:none; padding:0; margin:0; counter-reset:r; }
+  .rules li{ counter-increment:r; padding:10px 0 10px 40px; border-bottom:1px solid var(--line);
+             position:relative; break-inside:avoid; }
+  .rules li::before{ content:counter(r); position:absolute; left:0; top:11px;
+    width:25px; height:25px; line-height:25px; text-align:center; border-radius:50%;
+    background:var(--soft); color:var(--blue); font-weight:800; font-size:9.6pt; }
+  .rules b{ display:block; color:var(--navy); }
+  .rules span{ font-size:9.4pt; color:var(--ink2); }
+
+  /* ---------- runbook additions ---------- */
+  .cover-badge{ background:radial-gradient(circle at 32% 28%,#fee2e2 0%,#fecaca 100%); border-color:#fecaca; }
+  pre.code{ background:#0f172a; color:#e2e8f0; padding:11px 13px; border-radius:9px; font-size:8.4pt;
+            white-space:pre-wrap; word-break:break-all; margin:8px 0 12px; break-inside:avoid; }
+  code{ font-family:"Noto Sans Mono CJK JP","Noto Sans Mono",monospace; font-size:8.8pt;
+        background:var(--soft); padding:0 4px; border-radius:4px; }
+  pre.code code{ background:none; padding:0; color:inherit; }
+  .flow{ margin:14px 0 18px; break-inside:avoid; }
+  .q-box{ border:2px solid var(--navy); border-radius:11px; padding:10px 14px; font-weight:700; background:#fff; }
+  .qn{ display:inline-block; background:var(--navy); color:#fff; border-radius:6px; padding:0 7px;
+       font-size:8.6pt; margin-right:9px; }
+  .branches{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 0 14px; }
+  .branches.three{ grid-template-columns:1fr 1fr 1fr; }
+  .br{ border:1.5px solid var(--line); border-radius:10px; padding:9px 11px; background:var(--soft); font-size:9pt; }
+  .br p{ margin:4px 0 0; line-height:1.65; }
+  .tag{ display:inline-block; font-size:8.2pt; font-weight:800; color:var(--blue); background:#fff;
+        border:1px solid #bfdbfe; border-radius:20px; padding:0 8px; }
+  .arrow{ text-align:center; color:var(--ink3); font-size:14pt; margin:6px 0; }
+  ul.check{ list-style:none; padding:0; margin:0 0 12px; }
+  ul.check li{ position:relative; padding:4px 0 4px 26px; border-bottom:1px solid var(--line); font-size:9.5pt; break-inside:avoid; }
+  ul.check li::before{ content:""; position:absolute; left:0; top:7px; width:14px; height:14px;
+                       border:1.8px solid var(--ink2); border-radius:3px; }
+  ul.check .sub{ display:block; color:var(--ink3); font-size:8.6pt; margin-top:2px; }
+  /* printable paper sheet */
+  .paper-head{ border-bottom:2.5px solid var(--navy); padding-bottom:7px; }
+  .paper-title{ font-size:15pt; font-weight:800; color:var(--navy); }
+  .paper-fields{ font-size:9pt; display:flex; gap:18px; margin-top:8px; }
+  .paper-fields i, .paper-foot i{ display:inline-block; width:26mm; border-bottom:1px solid var(--ink2); height:12px; }
+  .paper-fields i.short{ width:10mm; }
+  .paper-foot i.long{ width:34mm; }
+  .paper-note{ font-size:8.8pt; color:var(--ink2); margin:6px 0 8px; }
+  table.sheet{ font-size:8.6pt; margin-top:4px; }
+  table.sheet th{ text-align:center; padding:5px 4px; }
+  table.sheet td{ height:9.2mm; padding:2px 4px; }
+  /* Handwriting form: rules dark enough to survive a black-and-white copier. */
+  table.sheet th, table.sheet td, table.contacts th, table.contacts td{ border-color:#8a96a8; }
+  .paper-foot{ margin-top:10px; font-size:9.4pt; text-align:right; }
+  table.contacts td{ height:12mm; }
+  .toastcase{ break-inside:avoid; margin:0 0 16px; }
+  .toastcase img{ display:block; width:112mm; border:1px solid var(--line); border-radius:10px; margin-bottom:7px; }
+  .toastcase h4{ margin:0 0 4px; font-size:10.8pt; }
+  .toastcase p{ font-size:9.6pt; margin:0 0 4px; }
+</style>
+</head>
+<body>
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-badge">🧯</div>
+    <h1>FES POS<br>障害対応手順書</h1>
+    <div class="sub">当日、システムが止まったときのために</div>
+    <div class="cover-rule"></div>
+    <p class="lead">
+      システムが止まっても、お店は止めない。<br>
+      お金はいつも通り受け取り、売れたものは紙に書く。<br>
+      直ったら紙の分をあとから入力すれば、売上も在庫も元通りになります。
+    </p>
+  </div>
+  <div class="cover-meta">
+    <b>この手順書は印刷して、スマホにも保存しておいてください。</b>
+    システムが止まっているときは、Webでは読めません。<br>
+    レジ係は <b>1章</b> だけ。管理者・リーダーは全部に目を通してください。
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<section>
+  <h2>もくじ</h2>
+  <ol class="toc">
+    <li><span class="n">1</span><span class="t">レジ係の行動カード</span><span class="d">全員。これだけ覚えれば大丈夫</span></li>
+    <li><span class="n">2</span><span class="t">何が壊れているかの見分け方</span><span class="d">管理者・リーダー</span></li>
+    <li><span class="n">3</span><span class="t">種類別の直し方</span><span class="d">管理者・リーダー</span></li>
+    <li><span class="n">4</span><span class="t">紙での営業と、復旧後の入力</span><span class="d">管理者・リーダー</span></li>
+    <li><span class="n">5</span><span class="t">事前の準備チェックリスト</span><span class="d">前日まで・当日朝・閉店後</span></li>
+    <li><span class="n">6</span><span class="t">当日は修正を反映しない</span><span class="d">どうしても必要なときの手順</span></li>
+    <li><span class="n">付</span><span class="t">紙の売上記録用紙・緊急連絡先</span><span class="d">印刷して各レジに置く</span></li>
+  </ol>
+
+  <div class="note" style="margin-top:22px">
+    <span class="lbl">いちばん大事なルール</span>
+    <b>3分直らなければ紙に切り替える。</b>お客様を待たせてまで直そうとしないこと。
+    紙で売った分は、あとから入力すれば売上も在庫も正しくなります。
+    直すのは管理者の仕事、売り続けるのがレジ係の仕事です。
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section class="page-break">
+  <h2><span class="num">1</span>レジ係の行動カード</h2>
+  <p class="sec-lead">画面にこれが出たら、こうする。</p>
+
+  <h3>赤い帯が出た</h3>
+  <figure style="max-width:118mm">
+    <img src="images/banner-device-offline.png" alt="赤い帯">
+    <figcaption>画面の上に赤い帯が出たら、サーバーとつながっていません。<b>表示されている在庫や売上は古い</b>可能性があります。</figcaption>
+  </figure>
+  <table>
+    <tr><th style="width:44%">帯の文字</th><th>やること</th></tr>
+    <tr><td><b>この端末がインターネットにつながっていません</b></td>
+        <td>あなたのスマホの電波の問題です。Wi-Fi・モバイルデータ・機内モードを確認。直らなければ、ほかの人の端末で会計します。</td></tr>
+    <tr><td><b>サーバーに接続できません</b></td>
+        <td>ほかのレジも同じなら、システム側の問題です。<b>管理者に伝えて</b>、<kbd>再接続</kbd> を押してみる。3分戻らなければ<b>紙に切り替え</b>。</td></tr>
+  </table>
+
+  <h3>会計を押したら、こう出た</h3>
+
+  <div class="toastcase">
+    <img src="images/toast-connection-lost.png" alt="通信が途切れました">
+    <h4>「通信が途切れました…」</h4>
+    <p>会計が記録されたかどうか分からない状態です。<b>カートはそのままで、もう一度「会計を確定する」を押してください。</b>
+       1回目がじつは記録されていた場合でも、<b>二重には記録されません</b>。システムが自動で見分けます。</p>
+    <div class="note danger" style="margin:8px 0 0; font-size:9pt;">
+      <span class="lbl">これだけは注意</span>
+      <b>別のスマホで打ち直さない。ページを読み込み直してから打ち直さない。</b>
+      二重防止が効くのは「同じ画面で、カートを変えずにもう一度押した」ときだけです。
+      どうしても別の端末で打つときは、先に履歴を見て記録されていないか確認します。
+    </div>
+  </div>
+
+  <div class="toastcase">
+    <img src="images/toast-duplicate-prevented.png" alt="先ほどの送信で記録済み">
+    <h4>「会計完了！（先ほどの送信で記録済みでした）」</h4>
+    <p>もう一度押したら、1回目がちゃんと記録されていたという意味です。<b>正常です</b>。そのまま次のお客様へ。</p>
+  </div>
+
+  <div class="toastcase">
+    <img src="images/toast-server-error.png" alt="サーバーでエラーが発生しました">
+    <h4>「サーバーでエラーが発生しました…」</h4>
+    <p>システム側の問題です（多くはデータベース）。少し待ってもう一度押す。<b>何度やってもダメなら管理者に伝えて、紙に切り替え</b>。</p>
+  </div>
+
+  <h3>そのほか</h3>
+  <table>
+    <tr><th style="width:36%">こんなとき</th><th>やること</th></tr>
+    <tr><td>「○○の在庫が不足しています」</td><td>ほかのレジが先に売りました。実物がまだあるなら管理者に補充をお願いする。</td></tr>
+    <tr><td>「処理中…」から進まない</td><td>最大15秒で「通信が途切れました」に変わります。変わったら上の手順。</td></tr>
+    <tr><td>画面が真っ白・固まった</td><td>ページを読み込み直す（アプリなら開き直す）。<b>記録済みの売上は消えません</b>。</td></tr>
+    <tr><td>PINを5回まちがえた</td><td>いつも使っている自分のスマホなら5分待つ。忘れたなら管理者に（PIN管理でリセットしてもらう）。</td></tr>
+    <tr><td>スマホの充電が切れた</td><td>別の端末で自分の番号でログインすれば続けられます。</td></tr>
+  </table>
+</section>
+
+<section class="page-break">
+  <h3>紙に切り替えるとき（レジ係）</h3>
+  <ol class="rules">
+    <li><b>お金はいつも通り受け取り、おつりもいつも通り渡す</b>
+        <span>合計は、商品の値段表を見て計算します。電卓があると安心です。</span></li>
+    <li><b>付録の「紙の売上記録用紙」に1会計1行で書く</b>
+        <span>時刻・商品と数量・合計金額・担当者番号。あとで入力する人が読める字で。</span></li>
+    <li><b>切り替えた時刻を管理者に伝える</b>
+        <span>「何時何分から紙です」。直前の会計がシステムに入ったかどうかの確認に使います。</span></li>
+    <li><b>直ったと言われたら、アプリに戻る</b>
+        <span>書いた用紙は管理者に渡します。レジ係が自分で打ち直す必要はありません。</span></li>
+  </ol>
+
+  <div class="note warn" style="margin-top:18px">
+    <span class="lbl">紙の間は在庫の表示が合いません</span>
+    紙で売った分はシステムの在庫から引かれていません。システム上で「残5」と出ていても、実物がもう無いことがあります。
+    <b>紙の間は、実物の残りを見て判断</b>してください。
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="page-break">
+  <h2><span class="num">2</span>何が壊れているかの見分け方</h2>
+  <p class="sec-lead">管理者・リーダー向け。上から順に確かめます。</p>
+
+  <div class="flow">
+    <div class="q-box"><span class="qn">Q1</span>おかしいのは <b>1台だけ</b>？ それとも <b>全部の端末</b>？</div>
+    <div class="branches">
+      <div class="br"><div class="tag">1台だけ</div>
+        <p><b>その端末の問題（→ 3章A）</b><br>電波、アプリの再起動、再ログイン。ほかの端末で会計を続ける。</p></div>
+      <div class="br"><div class="tag">全部</div>
+        <p>次のQ2へ。</p></div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="q-box"><span class="qn">Q2</span><b>合言葉を入れたことのあるスマホ</b>（レジのスマホなど）のブラウザで <b>（アプリのアドレス）/api/health</b>（例：<code>fes-pos-xxxx.onrender.com/api/health</code>）を開くと？</div>
+    <div class="branches three">
+      <div class="br"><div class="tag">開けない / エラー画面</div>
+        <p><b>サーバーが止まっている（→ 3章C）</b><br>ただし、そのスマホ自体がネットにつながっているかは先に確認。</p></div>
+      <div class="br"><div class="tag">"db":"error"</div>
+        <p><b>データベースが止まっている（→ 3章D）</b><br><b>"starting"</b> なら再起動直後。1〜2分待つ。</p></div>
+      <div class="br"><div class="tag">"status":"ok"</div>
+        <p><b>システムは正常（→ 3章B）</b><br>会場のネットワークが原因。モバイルデータに切り替える。</p></div>
+    </div>
+  </div>
+
+  <h3>「健康チェック」の読み方</h3>
+  <p>システムの状態を確認するためのページです。<b>合言葉を入れたことのある端末</b>で開くと、次のような文字が出ます。
+  合言葉を入れていない端末（外部の人と同じ）では、中身を隠すため <code>{"status":"ok"}</code> か <code>{"status":"unavailable"}</code> だけが出ます。その場合はレジのスマホで開き直してください。</p>
+  <pre class="code">{"status":"ok","server":"ok","db":"ok","dbLatencyMs":45,"commit":"5285c6e","time":"..."}</pre>
+  <table>
+    <tr><th style="width:28%">項目</th><th>意味</th></tr>
+    <tr><td><code>status</code></td><td><b>ok</b> なら全部正常。<b>degraded</b> なら一部が止まっている</td></tr>
+    <tr><td><code>db</code></td><td>データベース（TiDB）につながるか。<b>error</b> ならDBの障害。<b>starting</b> は再起動直後</td></tr>
+    <tr><td><code>dbLatencyMs</code></td><td>DBの応答時間（ミリ秒）。ふだんは数十〜数百。<b>数千</b>なら非常に遅い</td></tr>
+    <tr><td><code>commit</code></td><td>いま動いているプログラムの版。修正を反映したとき、切り替わったかの確認に使う</td></tr>
+  </table>
+
+  <div class="note">
+    <span class="lbl">帯とエラーの見分け</span>
+    レジの赤い帯は、<b>端末が圏外</b>なら「この端末が〜」、<b>サーバーかDBの障害</b>なら「サーバーに接続できません」と出ます。
+    DBが止まったときは、会計を押すと「サーバーでエラーが発生しました」と出ます。サーバー自体が止まったときは「通信が途切れました」です。
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="page-break">
+  <h2><span class="num">3</span>種類別の直し方</h2>
+  <p class="sec-lead">どの場合も、直している間はレジ係に紙で営業してもらいます。</p>
+
+  <h3>A. 1台だけおかしい（端末の問題）</h3>
+  <ol>
+    <li>その端末で、電波・Wi-Fi・機内モードを確認する</li>
+    <li>ページを読み込み直す（アプリなら一度閉じて開き直す）</li>
+    <li>ダメならログアウトして、もう一度ログイン</li>
+    <li>それでもダメなら、その端末は使わない。<b>別の端末でログイン</b>すれば続けられる（データはすべてサーバー側にある）</li>
+  </ol>
+
+  <h3>B. 全台おかしいが、健康チェックは ok（会場ネットワーク）</h3>
+  <ol>
+    <li>会場のWi-Fiを切って、<b>モバイルデータ（4G/5G）に切り替える</b></li>
+    <li>電波が弱い場所なら、テザリングできる端末を1台用意して、ほかの端末をつなぐ</li>
+    <li>時間帯によって混雑するなら、紙で営業して空いてから入力する</li>
+  </ol>
+
+  <h3>C. サーバーが止まっている（Render）</h3>
+  <ol>
+    <li><b>まず1分待つ。</b>無料プランのサーバーは、しばらく誰も使わないと休止し、次に開いたときの起動に30秒〜1分かかる（開店直後・休憩明けに起きやすい）。健康チェックのページを開いたまま待つ</li>
+    <li>Renderのダッシュボード（dashboard.render.com）にログインし、サービスの状態と <b>Logs</b> を見る</li>
+    <li>直前に修正を反映していた場合 → <b>ひとつ前のデプロイに戻す（Rollback）</b>。これがいちばん確実</li>
+    <li>そうでなければ、サービスを <b>再起動（Restart）</b> する</li>
+    <li>Render自体の障害（status.render.com）なら、復旧を待つしかない。紙で営業を続ける</li>
+  </ol>
+  <div class="note warn">
+    <span class="lbl">再起動すると</span>
+    PINの入力ミスによるロックも解除されます。逆に言うと、ロックを解くためだけに営業中に再起動する必要はありません（自分のスマホなら5分で解け、ほかの人のミスで自分のスマホがロックされることはありません）。
+    ログアウトしたセッションは、再起動しても使えないままです（データベースに記録しているため）。
+  </div>
+
+  <h3>D. データベースが止まっている（TiDB Cloud）</h3>
+  <ol>
+    <li>TiDB Cloudのコンソール（tidbcloud.com）にログインし、クラスタの状態を見る</li>
+    <li><b>無料枠（Request Units）を使い切っていないか</b>確認する。使い切ると極端に遅くなったり止まったりする。支出上限（Spending Limit）を上げれば戻ることがある</li>
+    <li>TiDB Cloud自体の障害なら復旧を待つ。<b>DBが戻れば、サーバーの再起動なしで数秒で自動的に復帰する</b>（事前に確認済み）</li>
+  </ol>
+
+  <h3>E. ログインできない</h3>
+  <table>
+    <tr><th style="width:30%">状況</th><th>対応</th></tr>
+    <tr><td>「確認が完了しませんでした」と出る</td><td>
+      入力欄の下の確認（Cloudflare）が済む前に送信した。確認の枠に「成功しました」が出てから、もう一度押す。
+      出ない・何度やってもだめなら、Wi-Fiを切ってモバイル回線で試す（会場のネットワークがCloudflareを止めていることがある）
+    </td></tr>
+    <tr><td>「確認サービスにつながりませんでした」と出る</td><td>
+      サーバーからCloudflareに確認できていない（Cloudflare側の障害など）。<b>ログイン済みのスマホはそのまま使える</b>（確認はログインのときだけ）。
+      新しくログインする必要があるときは、確認を一時的に切る：Renderのダッシュボード → サービス → <b>Environment</b> で
+      <code>TURNSTILE_SITE_KEY</code> と <code>TURNSTILE_SECRET_KEY</code> を<b>2つとも</b>消して保存（自動で再デプロイ、数分）。
+      片方だけ消すとサーバーが起動しない（旧版が動き続ける）。復旧したら同じ値を2つとも戻す
+    </td></tr>
+    <tr><td>PINを5回まちがえた</td><td>
+      <b>その番号でログインしたことのあるスマホ</b>なら、5分待てば解除される（ほかの人がその番号でミスしても、このスマホはロックされない）。<br>
+      <b>その番号で初めて使う端末</b>からは、番号ごとに1時間に10回（管理者の番号は5回）、店全体で15分に30回までしか試せず、超えると最長1時間止まる（総当たり対策）。
+      いつもの自分のスマホで入る。急ぐならサーバーを再起動すると解ける（C）
+    </td></tr>
+    <tr><td>管理者の画面に「PINの入力ミスが○回」と赤い帯が出た</td><td>
+      PIN管理 → 操作タブで、どの番号に・どの端末から・何時に間違えたかを見る。本人の打ち間違いでなければ誰かがPINを試している。
+      その番号のPINを管理者がリセットし、本人に新しいPINを伝える。合言葉が漏れていそうなら合言葉も変える（Renderの <code>POS_ACCESS_CODE</code>）
+    </td></tr>
+    <tr><td>初めての人が「承認待ち」になる</td><td>
+      本人の画面に出ている<b>4文字の申請コード</b>を見せてもらい、管理者がPIN管理の「承認待ち」にそのコードを入れて承認する。
+      コードが合わないときは、別の人が同じ番号で申請している。承認せず、本人にもう一度PINを設定してもらう（コードが新しくなる）
+    </td></tr>
+    <tr><td>一般メンバーがPINを忘れた</td><td>管理者がPIN管理でリセットする</td></tr>
+    <tr><td>管理者がPINを忘れた</td><td>
+      ほかの管理者がいればその人がPIN管理でリセットする。いなければ<b>復旧コード</b>で設定し直す（DBを直接触らない）:
+      <ol style="margin:6px 0 0">
+        <li>Renderのダッシュボード → サービス → <b>Environment</b> で <code>POS_ADMIN_RECOVERY_CODE</code> を追加する。
+            値は<b>16文字以上のでたらめな文字列</b>（パスワード生成などで作る。誰にも送らない）。保存すると自動で再デプロイ（数分）</li>
+        <li>ログイン画面で管理者の番号を入れ、「管理者の復旧コードを使う」→ 復旧コードと新しいPINを入れる</li>
+        <li>入れたら、<b>Renderから <code>POS_ADMIN_RECOVERY_CODE</code> を消す</b>（消すまで、コードを知っている人は誰でも管理者のPINを変えられる）</li>
+      </ol>
+      復旧コードを5回まちがえると、1時間は使えなくなる。
+      <b>以前の「TiDBで管理者の行を消す」方法は使わない</b>：いまは消しても誰も承認できない承認待ちになるだけで、入れない
+    </td></tr>
+    <tr><td>合言葉の画面で「試行回数が多すぎます」</td><td>
+      誰かが合言葉を何度も間違えたため、<b>初めて使う端末</b>が10分止まっている。前に合言葉を入れたことのある端末は影響を受けない。10分待つ
+    </td></tr>
+  </table>
+  <div class="note">
+    <span class="lbl">管理者は1人だけ</span>
+    取消・在庫補充・商品の変更・PINの承認は管理者しかできません。管理者がレジを離れている間にこれらが必要になったら、
+    <b>メモしておいて、戻ってきたらまとめて処理</b>します。
+    釣り銭の登録・締め・釣り銭の返却は、管理者のほかに<b>会計係</b>（管理者がPIN管理で指定）もできます。本部への回収と両替は誰でもできます。
+  </div>
+
+  <h3>F. データの問題</h3>
+  <table>
+    <tr><th style="width:30%">状況</th><th>対応</th></tr>
+    <tr><td>間違えて会計した</td><td>管理者が履歴から<b>取消</b>（削除ではなく取消）。売上も在庫も元に戻る</td></tr>
+    <tr><td>在庫の数が実物と合わない</td><td>多いとき：管理者が商品画面で初期在庫を直す。少ないとき：在庫画面で補充</td></tr>
+    <tr><td>全データリセットを押してしまった</td><td>「全データリセット」と入力しないと実行されない。実行してしまった場合はアプリの中では元に戻せない（操作ログも消え、誰がリセットしたかだけが新しいログの1行目とRenderのログに残る）。閉店ごとに保存したCSVと紙の記録から作り直す。<b>営業が始まったらリセットは絶対に使わない</b></td></tr>
+  </table>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="page-break">
+  <h2><span class="num">4</span>紙での営業と、復旧後の入力</h2>
+  <p class="sec-lead">紙の分をあとから入力すれば、売上も在庫も正しくなります。</p>
+
+  <h3>紙に切り替えると決めたら</h3>
+  <ol>
+    <li>全レジに「何時何分から紙」と伝える</li>
+    <li>各レジに記録用紙（付録）とペンを配る</li>
+    <li>値段表（商品と価格の一覧）をレジの前に貼る</li>
+    <li>受け渡しの画面にも注文が出なくなるので、<b>レジ係が商品を直接渡す</b>か、用紙の控えを受け渡し係に渡す</li>
+    <li>直す担当（管理者）と、売り続ける担当を分ける</li>
+  </ol>
+
+  <h3>直ったら（入力の手順）</h3>
+  <ol class="rules">
+    <li><b>全レジに「アプリに戻って」と伝え、用紙を回収する</b>
+        <span>ここから先の新しい会計は、いつも通りアプリで。</span></li>
+    <li><b>切り替え直前の会計が入っているか、履歴で確認する</b>
+        <span>「通信が途切れました」のあと紙に書いた会計は、じつはシステムに入っていることがあります。時刻と中身が同じものが履歴にあれば、その行は入力しない。</span></li>
+    <li><b>1人・1台で、紙の行を順に入力する</b>
+        <span>レジ画面で商品を入れて、預かり金は <kbd>ちょうど</kbd>。入力したら用紙の「入力済」に✓。複数人で分けると、同じ行を二重に打ちやすい。</span></li>
+    <li><b>入力が終わったら、受け渡し画面で「すべて渡した」を押す</b>
+        <span>紙の分の商品はもう渡してあるのに、入力した注文が「受け渡し待ち」に並ぶため。先にアプリで会計した分の受け渡しが終わってから押す。</span></li>
+    <li><b>最後に、レジの現金と「本日の売上」を照合する</b>
+        <span>合っていれば復旧完了。</span></li>
+  </ol>
+
+  <div class="note">
+    <span class="lbl">入力するとどうなるか</span>
+    売上の合計と在庫は正しくなります。ただし<b>会計の時刻は入力した時刻</b>になるので、売上画面の「時間帯別」のグラフだけは実際とずれます。合計金額には影響しません。
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="page-break">
+  <h2><span class="num">5</span>事前の準備チェックリスト</h2>
+  <p class="sec-lead">障害のほとんどは、前日までの準備で防げるか、影響を小さくできます。</p>
+
+  <h3>前日まで</h3>
+  <ul class="check">
+    <li><b>アプリが最新の状態で動いている</b>。健康チェックが <code>"status":"ok"</code> を返すことを確認した
+        <span class="sub">データベースの表や列はサーバーの起動時に自動で作られる。<code>drizzle-kit push</code> は実行しない（もし実行して「テーブルを空にしますか（truncate）」と聞かれたら、必ず <b>No</b>）</span></li>
+    <li><b>本番で通し練習をした</b>（スマホ2台以上で、同じ商品を同時に会計 → 在庫が正しく減る。取消もやってみる）</li>
+    <li><b>全員が一度ログインしてPINを決め、管理者が申請コードを見て承認した</b>。PIN管理画面に「未設定」「承認待ち」が残っていない
+        <span class="sub">未設定の番号は、ほかの人が先に申請できてしまう（申請コードが本人の画面と合わなければ承認しないこと）。1234・0000のような推測されやすいPINは設定できない</span></li>
+    <li><b>合言葉（Renderの <code>POS_ACCESS_CODE</code>）が、推測されにくく、クラスの外に漏れていない値になっている</b>。変えるとログイン済みのスマホもみんな合言葉を入れ直すので、全員に新しい合言葉を伝えてから
+        <span class="sub">去年の合言葉や、どこかに書いて貼り出した合言葉は使わない</span></li>
+    <li><b>会計係を決めた</b>（PIN管理の「会計係」）。釣り銭の登録・締め・返却を管理者以外がやる場合</li>
+    <li>Renderに <code>POS_ADMIN_RECOVERY_CODE</code> が<b>残っていない</b>ことを確認した（管理者が最初のPINを決めるときと、PINを忘れたときだけ使うもの）</li>
+    <li>商品・価格・原価・初期在庫・警告ラインを本番の内容にした</li>
+    <li>練習で入れた取引を消した（商品タブの「練習を片付ける」）
+        <span class="sub">「リセット」（全データリセット）は商品も消えるので、使った場合は商品を入れ直す</span></li>
+    <li>TiDB Cloudで、無料枠（Request Units）の残りと支出上限を確認した。バックアップ機能が使えるかも確認した</li>
+    <li>Renderのプラン（無料か有料か）を確認した。Render・TiDB Cloudに<b>ログインできる人を2人以上</b>決めた</li>
+    <li>この手順書を印刷し、管理者とリーダーのスマホにも保存した</li>
+    <li>紙の売上記録用紙を<b>各レジ5枚</b>印刷した。ペン・電卓・値段表を用意した</li>
+    <li>付録の緊急連絡先を埋めた</li>
+    <li>Androidの人はアプリ、iPhoneの人はホーム画面への追加を済ませた。モバイルバッテリーを用意した</li>
+    <li>ログインの確認（Cloudflare Turnstile）を入れている場合：<b>会場のWi-Fi</b>で、Androidアプリ・iPhone・PCのそれぞれから合言葉とPINを通してみた
+        <span class="sub">通らないときの対応は3章E。全員が前日までにログインしておけば、当日にCloudflareが止まっても影響しない</span></li>
+  </ul>
+
+  <h3>当日の朝（開店15分前）</h3>
+  <ul class="check">
+    <li>管理者が健康チェックを開く（休止中のサーバーを起こす＋状態の確認）</li>
+    <li>全レジでログインし、画面の上に赤い帯が出ていないことを確認</li>
+    <li>1台で試しに1件会計 → 管理者が取消（本番で動くことの確認）</li>
+    <li>会場のWi-Fiとモバイルデータ、両方つながることを確認</li>
+    <li>2日目の朝は、全員ログインし直す（ログインは24時間で切れる）</li>
+  </ul>
+
+  <div style="break-inside:avoid">
+  <h3>閉店後</h3>
+  <ul class="check">
+    <li>売上画面から<b>取引明細のCSVをダウンロード</b>して保存（その日のバックアップ）</li>
+    <li>レジの現金と「本日の売上」が合っているか照合</li>
+    <li>紙で営業した時間があれば、入力漏れがないか用紙の「入力済」を確認</li>
+  </ul>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section>
+  <h2 style="margin-top:26px"><span class="num">6</span>当日は修正を反映しない</h2>
+  <p class="sec-lead">営業中に main に push すると、その瞬間に本番が切り替わります。</p>
+
+  <p>RenderはGitHubの main ブランチに push されると、自動で本番に反映（デプロイ）します。営業中にこれが起きると:</p>
+  <ul>
+    <li>数十秒〜数分、サーバーが不安定になる</li>
+    <li>開いている端末が新しい版を読み込み直すことがあり、<b>作りかけのカートが消える</b></li>
+    <li>修正に不具合があれば、その場で全レジが止まる</li>
+  </ul>
+  <p><b>営業日は main に push しない</b>（凍結）。見つけた不具合は、閉店後か翌日の開店前に直します。</p>
+
+  <h3>どうしても営業中に直す必要があるとき</h3>
+  <ol>
+    <li>お客様が途切れたタイミングを選び、全レジに「1〜2分止まります」と伝える（その間は紙）</li>
+    <li>push して、Renderのダッシュボードでデプロイが終わるのを待つ</li>
+    <li>健康チェックの <code>commit</code> が新しい版に変わったことを確認</li>
+    <li>全レジでページを読み込み直してもらう</li>
+    <li>おかしければ、すぐにRenderで<b>ひとつ前のデプロイに戻す（Rollback）</b></li>
+  </ol>
+</section>
+
+<!-- ============ APPENDIX: paper sheet ============ -->
+<section class="page-break paper">
+  <div class="paper-head">
+    <div class="paper-title">紙の売上記録用紙</div>
+    <div class="paper-fields">
+      <span>日付 <i></i></span><span>レジ（端末） <i></i></span><span>記入者の番号 <i></i></span><span>No. <i class="short"></i></span>
+    </div>
+  </div>
+  <p class="paper-note">1会計1行。<b>お金はいつも通り受け取り、おつりもいつも通り渡す。</b>システムが直ったら、この用紙を管理者に渡す（レジ係は打ち直さない）。</p>
+  <table class="sheet">
+    <thead>
+      <tr><th style="width:6%">No</th><th style="width:10%">時刻</th><th>商品と数量（例：たこ焼き×2、お茶×1）</th>
+          <th style="width:12%">合計</th><th style="width:12%">預かり</th><th style="width:10%">担当</th><th style="width:8%">入力済</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="c">1</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">2</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">3</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">4</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">5</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">6</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">7</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">8</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">9</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">10</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">11</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">12</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">13</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">14</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">15</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">16</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">17</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">18</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">19</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">20</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">21</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+      <tr><td class="c">22</td><td></td><td></td><td></td><td></td><td></td><td class="c">□</td></tr>
+    </tbody>
+  </table>
+  <div class="paper-foot">この用紙の合計 <i class="long"></i> 円　／　入力した人 <i></i></div>
+</section>
+
+<!-- ============ APPENDIX: contacts ============ -->
+<section class="page-break">
+  <h2><span class="num">付</span>緊急連絡先</h2>
+  <p class="sec-lead">前日までに埋めて、各レジに置いておく。</p>
+  <table class="contacts">
+    <tr><th style="width:36%">役割</th><th style="width:30%">名前</th><th>連絡先</th></tr>
+    <tr><td>管理者（取消・補充・商品）</td><td></td><td></td></tr>
+    <tr><td>管理者の代わり（不在時の判断）</td><td></td><td></td></tr>
+    <tr><td>Renderにログインできる人</td><td></td><td></td></tr>
+    <tr><td>TiDB Cloudにログインできる人</td><td></td><td></td></tr>
+    <tr><td>担当の先生</td><td></td><td></td></tr>
+  </table>
+
+  <h3>URL</h3>
+  <table>
+    <tr><th style="width:36%">アプリ</th><td>https://＿＿＿＿＿＿＿＿＿＿＿＿＿＿.onrender.com</td></tr>
+    <tr><th>健康チェック</th><td>上のアドレス ＋ <code>/api/health</code></td></tr>
+    <tr><th>Render（サーバー）</th><td>dashboard.render.com ／ 障害情報：status.render.com</td></tr>
+    <tr><th>TiDB Cloud（データベース）</th><td>tidbcloud.com</td></tr>
+  </table>
+
+  <h3>この手順書で確認済みのこと</h3>
+  <p style="font-size:9.3pt">
+    次の障害は、本番と同じ構成（TiDB）を用意して実際に起こし、この手順書どおりに動くことを確認しています：
+    端末の圏外／サーバー停止／会計の応答だけが消える通信断／サーバーが固まる／データベース停止。
+    いずれも売上の欠落・二重記録は起きず、データベースは復旧後にサーバーの再起動なしで自動的に復帰しました。
+  </p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,275 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+/* Tokens, background, card, input, type, icon chip, PIN boxes: shared
+   with the server-rendered 合言葉 / login pages. */
+@import "../public/theme.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * "Aurora Glass" — a Liquid-Glass-inspired material for FES POS, built to
+ * be genuinely translucent in BOTH light and dark, with original touches
+ * so it is not a 1:1 copy of Apple's system.
+ *
+ * Reference (user-provided): Apple WWDC 2025 session 219, "Meet Liquid
+ * Glass" — https://developer.apple.com/jp/videos/play/wwdc2025/219/
+ *
+ * What is faithful to Liquid Glass:
+ *   - Real translucency + backdrop blur, so a colourful backdrop shows
+ *     through every card / panel / sheet.
+ *   - Specular edge lighting (a bright top-left rim + soft lower edge),
+ *     the "lensing" that makes the material read as glass.
+ *   - Sheets that grow from the point you tapped.
+ *
+ * What is deliberately ORIGINAL (not Apple):
+ *   1. "Aurora" backdrop — instead of borrowing the user's wallpaper,
+ *      the glass floats over a soft multi-point colour field that we
+ *      generate ourselves, so the look is self-contained and on-brand.
+ *   2. Intelligent time-of-day tint — the aurora shifts hue across the
+ *      day (morning / day / evening / night), computed once client-side
+ *      (see index.html). Works in BOTH light and dark. This is our own
+ *      idea drawn from HarmonyOS's "colour from context", not from Apple.
+ *   3. Two-tone layered icon chips (lighter core → deeper rim), set
+ *      per-instance in the components.
+ *   The money-critical accent (Cosmic Blue) and filled action buttons
+ *   stay solid & opaque for legibility — a deliberate trade-off Apple
+ *   itself walked back toward in iOS 26.1 after over-transparent buttons
+ *   hurt readability.
+ *
+ * DARK-MODE BUG FIX: the previous build let :root[data-daytime="…"]
+ * (specificity 0,2,0) override .dark (0,1,0), forcing a light background
+ * in dark mode. Here every daytime rule is scoped to html:not(.dark)…
+ * or html.dark…, so the two schemes can never collide.
+ *
+ * Toggled by adding/removing `.dark` on <html> (ThemeContext); switching
+ * cross-fades smoothly.
+ */
+
+@theme inline {
+  --color-background: #eef1f8;
+  --color-foreground: #1c2128;
+  --color-card: rgba(255, 255, 255, 0.55);
+  --color-card-foreground: #1c2128;
+  --color-popover: rgba(255, 255, 255, 0.72);
+  --color-popover-foreground: #1c2128;
+  --color-primary: #0a59f7;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: rgba(255, 255, 255, 0.5);
+  --color-secondary-foreground: #1c2128;
+  --color-muted: rgba(255, 255, 255, 0.4);
+  --color-muted-foreground: #4a5560;
+  --color-accent: rgba(10, 89, 247, 0.12);
+  --color-accent-foreground: #0a59f7;
+  --color-destructive: #d43a22;
+  --color-destructive-foreground: #ffffff;
+  --color-border: rgba(255, 255, 255, 0.55);
+  --color-input: rgba(255, 255, 255, 0.55);
+  --color-ring: #0a59f7;
+  --color-chart-1: #0a59f7;
+  --color-chart-2: #18a058;
+  --color-chart-3: #ed6f21;
+  --color-chart-4: #7b61ff;
+  --color-chart-5: #d43a22;
+  --color-sidebar: rgba(255, 255, 255, 0.5);
+  --color-sidebar-foreground: #1c2128;
+  --color-sidebar-primary: #0a59f7;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: rgba(10, 89, 247, 0.12);
+  --color-sidebar-accent-foreground: #0a59f7;
+  --color-sidebar-border: rgba(255, 255, 255, 0.55);
+  --color-sidebar-ring: #0a59f7;
+  --radius: 1.375rem;
+  --font-sans: 'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans JP', system-ui, sans-serif;
+  --font-mono: 'HarmonyOS Sans SC', 'Noto Sans JP', ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
+.font-number {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* ===== Motion ===== */
+/* Aurora drift — each of the (up to 4) background gradient layers slides
+   independently around its oversized canvas in a slow, organic loop.
+   CSS repeats a shorter background-position list to match however many
+   gradient layers a given theme/daytime variant actually defines, so one
+   shared keyframe works for the 2-, 3-, and 4-layer variants alike. */
+@keyframes ws-spin { to { transform: rotate(360deg); } }
+@keyframes ws-chip-tap { 0% { transform: scale(1); } 40% { transform: scale(0.91); } 100% { transform: scale(1); } }
+.ws-pop { animation: ws-pop 0.4s var(--ease-spring) both; }
+.ws-spin { animation: ws-spin 0.9s linear infinite; }
+
+/* The signature "dissolve" delete effect — the deleted row erodes through
+   a noise alpha-mask (mask-position/size shift so the noise granularly eats
+   the card) while it fades + shrinks, then collapses its own height and gap
+   so the rows below glide up to fill the space. It is driven imperatively
+   in client/src/components/pos/DissolveItem.tsx (one set of WAAPI
+   animations) rather than in CSS, because the height/gap values are dynamic
+   and the noise mask must only be applied *during* the exit (a permanent
+   noise mask would speckle the card at rest). No canvas particles, no live
+   SVG filter — only mask/opacity/transform plus a short one-shot height
+   collapse. prefers-reduced-motion is handled there too (fade + collapse,
+   no mask). This class is just a hook for any static styling if needed. */
+.ws-dissolvable { position: relative; }
+
+.ws-stagger-1 { animation-delay: 0.03s; }
+.ws-stagger-2 { animation-delay: 0.06s; }
+.ws-stagger-3 { animation-delay: 0.09s; }
+.ws-stagger-4 { animation-delay: 0.12s; }
+.ws-stagger-5 { animation-delay: 0.15s; }
+.ws-stagger-6 { animation-delay: 0.18s; }
+.ws-stagger-7 { animation-delay: 0.21s; }
+.ws-stagger-8 { animation-delay: 0.24s; }
+
+/* Sheets: grow from the tapped point on desktop, rise from the bottom on
+   mobile (a full-width sheet skewing from a tap point looks wrong). */
+@keyframes ws-sheet-mobile { from { transform: translateY(100%); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+@keyframes ws-sheet-desktop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.ws-sheet-pop { animation: ws-sheet-mobile 0.5s var(--ease-smooth) both; }
+@media (min-width: 768px) {
+  .ws-sheet-pop { animation: ws-sheet-desktop 0.44s var(--ease-spring) both; }
+}
+
+.ws-card-interactive {
+  transition: box-shadow 0.35s var(--ease-smooth), transform 0.3s var(--ease-smooth),
+    border-color 0.3s var(--ease-smooth), background-color 0.4s var(--ease-smooth);
+}
+.ws-card-interactive:hover {
+  box-shadow:
+    inset 0 1px 0 var(--ws-glass-hi),
+    inset 0 -1px 0 var(--ws-glass-lo),
+    var(--ws-sh-h);
+  transform: translateY(-3px);
+}
+.ws-card-interactive:active {
+  transform: scale(0.975);
+  transition: transform 0.2s var(--ease-spring);
+}
+.ws-card-active {
+  border-color: var(--ws-ac) !important;
+  box-shadow: inset 0 1px 0 var(--ws-glass-hi), var(--ws-sh), 0 0 0 3px var(--ws-ach) !important;
+}
+
+/* ===== Scrim behind every sheet (SheetOverlay.tsx) =====
+   Dims and blurs the whole screen so the sheet reads on its own. 4px used
+   to leave product names readable behind the checkout. */
+@keyframes ws-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+.ws-scrim {
+  background: rgba(15, 23, 42, 0.34);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  backdrop-filter: blur(18px) saturate(1.15);
+  animation: ws-scrim-in 0.3s var(--ease-smooth) both;
+}
+.dark .ws-scrim { background: rgba(0, 0, 0, 0.5); }
+
+/* ===== Glass sheet (modals) ===== */
+.ws-glass-sheet {
+  background: var(--ws-sheet);
+  -webkit-backdrop-filter: blur(34px) saturate(1.9);
+  backdrop-filter: blur(34px) saturate(1.9);
+  border: 1px solid var(--ws-cardbd);
+  box-shadow: inset 0 1px 0 var(--ws-glass-hi), var(--ws-sh-h);
+}
+
+/* ===== Glass nav panels (Sidebar / BottomNav use .ws-tile-panel) ===== */
+.ws-tile-panel {
+  background: var(--ws-sb);
+  -webkit-backdrop-filter: blur(30px) saturate(1.8);
+  backdrop-filter: blur(30px) saturate(1.8);
+  border: 1px solid var(--ws-cardbd);
+  box-shadow: inset 0 1px 0 var(--ws-glass-hi), var(--ws-sh);
+  transition: background-color 0.4s var(--ease-smooth), border-color 0.4s var(--ease-smooth);
+}
+
+/* ===== Signature capsule buttons + smooth press ===== */
+button:not(.ws-card):not(.ws-rect) {
+  border-radius: 9999px !important;
+}
+button:not(.ws-card) {
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.3s var(--ease-smooth),
+    background-color 0.3s var(--ease-smooth), opacity 0.25s var(--ease-smooth);
+}
+button:not(.ws-card):active {
+  transform: scale(0.96);
+}
+
+
+/* ===== Badge ===== */
+.ws-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.3s var(--ease-smooth), color 0.3s var(--ease-smooth);
+}
+
+.ws-sep { border: none; border-top: 1px solid var(--ws-bd); }
+.ws-kpi-bar { width: 4px; border-radius: 999px; flex-shrink: 0; align-self: stretch; }
+
+/* ===== Type scale ===== */
+.hos-display { font-family: var(--font-display); font-size: 38px; font-weight: 300; letter-spacing: -0.02em; color: var(--ws-tx); }
+.hos-body { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--ws-ts); }
+
+.ws-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ws-td);
+  letter-spacing: 0.04em;
+  padding: 0 2px;
+  margin: 18px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ws-section-label:first-child { margin-top: 2px; }
+.ws-section-label::after { content: ""; flex: 1; height: 1px; background: var(--ws-bd); }
+
+.ws-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; display: inline-block; }
+
+.ws-icon-chip:active, .ws-icon-chip-sm:active { animation: ws-chip-tap 0.32s var(--ease-spring) both; }
+
+.container { @apply mx-auto px-4; }
+
+/* =====================================================================
+   Print report — hidden in normal use, shown only when printing (used
+   for exporting the accounting report as a PDF via the browser's own
+   "Print to PDF" dialog, so no extra library / Japanese font embedding
+   is needed).
+   ===================================================================== */
+.print-report {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-report,
+  .print-report * {
+    visibility: visible;
+  }
+  .print-report {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-family: "Noto Sans JP", sans-serif;
+  }
+  @page {
+    margin: 16mm 14mm;
+  }
+}
+

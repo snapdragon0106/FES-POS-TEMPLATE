@@ -1,0 +1,47 @@
+# Render Blueprint: Render の「New → Blueprint」でこのリポジトリを選ぶと、
+# この内容でサーバー（Web Service）が作られる。手順は docs/FES-POSセットアップ手順書.pdf。
+#
+# sync: false の項目は、作るときに Render の画面で値を入力する。
+# generateValue: true の項目は Render が長いランダムな値を自動で作る（入力不要）。
+# 値は Render の Environment 画面で後から見たり変えたりできる。
+services:
+  - type: web
+    name: fes-pos
+    runtime: node
+    plan: free
+    # 日本に一番近い地域
+    region: singapore
+    # pnpm を使ってビルドする（Render に pnpm が無くても npx が取ってくる）。
+    # NODE_ENV=production はここでは付けない：付けるとビルドに要る道具が入らない。
+    buildCommand: npx --yes pnpm@10.4.1 install --frozen-lockfile && npx --yes pnpm@10.4.1 run build
+    startCommand: npm run start
+    # サーバーとデータベースが動いているかの確認先（手順書の切り分けでも使う）
+    healthCheckPath: /api/health
+    # main に変更が入るたびに自動で反映する
+    branch: main
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # TiDB Cloud の接続先：mysql://ユーザー名:パスワード@ホスト:4000/fespos
+      # （最後の fespos はデータベースの名前。無ければ自動で作る。暗号化の設定は自動で付く）
+      - key: DATABASE_URL
+        sync: false
+      # 名簿：番号:名前 をカンマで区切る（例 3501:山田 太郎,3502:佐藤 花子）
+      - key: POS_MEMBERS
+        sync: false
+      # 管理者の番号（名簿にある番号。2人なら 3501,3502）
+      - key: POS_ADMIN_IDS
+        sync: false
+      # 最初の画面で入れる合言葉
+      - key: POS_ACCESS_CODE
+        sync: false
+      # 店の名前（ログイン画面に出る。例：経高祭 3年5組）
+      - key: POS_SHOP_NAME
+        sync: false
+      # ログインの記録に署名する鍵（自動で作る）
+      - key: JWT_SECRET
+        generateValue: true
+      # 管理者が最初のPINを決めるとき・PINを忘れたときに使うコード（自動で作る）
+      - key: POS_ADMIN_RECOVERY_CODE
+        generateValue: true

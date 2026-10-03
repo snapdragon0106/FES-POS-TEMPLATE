@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>FES POS 操作説明書</title>
+<style>
+  @page { size: A4; margin: 17mm 15mm 20mm; }
+
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --blue:#1d4ed8; --navy:#051733; --green:#15803d; --orange:#ea580c;
+    --red:#dc2626; --purple:#7c3aed;
+    --line:#dbe3ef; --soft:#f1f5fb;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    margin:0; color:var(--ink);
+    font-family:"Noto Sans CJK JP","Noto Sans JP",sans-serif;
+    font-size:10.2pt; line-height:1.85; font-feature-settings:"palt" 1;
+  }
+
+  /* ---------- cover ---------- */
+  .cover{ height:247mm; display:flex; flex-direction:column; break-after:page; position:relative; }
+  .cover-top{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .cover-badge{
+    width:74px; height:74px; border-radius:22px; display:flex; align-items:center; justify-content:center;
+    font-size:38px; background:radial-gradient(circle at 32% 28%,#dbeafe 0%,#bfdbfe 100%);
+    border:1.5px solid #bfdbfe; margin-bottom:22px;
+  }
+  .cover h1{ font-size:40pt; line-height:1.18; margin:0 0 6px; letter-spacing:-.02em; color:var(--navy); }
+  .cover .sub{ font-size:15pt; color:var(--blue); font-weight:700; margin-bottom:26px; }
+  .cover .lead{ font-size:11pt; color:var(--ink2); max-width:118mm; line-height:2; }
+  .cover-rule{ height:5px; width:74px; background:var(--blue); border-radius:4px; margin:26px 0; }
+  .cover-meta{ border-top:1.5px solid var(--line); padding-top:14px; font-size:9.4pt; color:var(--ink3); }
+  .cover-meta b{ color:var(--ink); }
+
+  /* ---------- structure ---------- */
+  h2{
+    font-size:16.5pt; color:var(--navy); margin:0 0 4px; letter-spacing:-.01em;
+    break-after:avoid; padding-bottom:7px; border-bottom:2.5px solid var(--blue);
+  }
+  h2 .num{ color:var(--blue); margin-right:10px; }
+  .sec-lead{ color:var(--ink3); font-size:9.6pt; margin:8px 0 16px; break-after:avoid; }
+  h3{ font-size:12pt; color:var(--navy); margin:20px 0 8px; break-after:avoid; }
+  h3::before{ content:""; display:inline-block; width:4px; height:15px; background:var(--blue);
+              border-radius:2px; margin-right:9px; vertical-align:-2px; }
+  h4{ font-size:10.4pt; color:var(--ink); margin:14px 0 5px; break-after:avoid; }
+  p{ margin:0 0 9px; }
+  .page-break{ break-before:page; }
+  section{ break-inside:auto; }
+
+  /* ---------- toc ---------- */
+  .toc{ list-style:none; padding:0; margin:14px 0 0; }
+  .toc li{ display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); align-items:baseline; }
+  .toc .n{ color:var(--blue); font-weight:800; width:24px; flex:none; }
+  .toc .t{ font-weight:700; }
+  .toc .d{ color:var(--ink3); font-size:9pt; margin-left:auto; text-align:right; max-width:78mm; }
+
+  /* ---------- steps with phone shots ---------- */
+  .step{ display:grid; grid-template-columns:1fr 46mm; gap:13px; align-items:start;
+         break-inside:avoid; margin:0 0 16px; }
+  .step.rev{ grid-template-columns:46mm 1fr; }
+  .step-body{ min-width:0; }
+  .step-num{ display:inline-flex; align-items:center; justify-content:center;
+    width:23px; height:23px; border-radius:50%; background:var(--blue); color:#fff;
+    font-size:10pt; font-weight:800; margin-right:9px; vertical-align:-5px; }
+  .step h4{ margin:0 0 6px; font-size:11pt; }
+  .step p{ font-size:9.6pt; margin:0 0 6px; }
+  .shot img{ width:100%; display:block; border:1px solid var(--line); border-radius:9px; }
+  .cap{ font-size:8.2pt; color:var(--ink3); margin-top:5px; line-height:1.55; }
+
+  figure{ margin:12px 0 16px; break-inside:avoid; }
+  figure img{ width:100%; display:block; border:1px solid var(--line); border-radius:10px; }
+  figure figcaption{ font-size:8.6pt; color:var(--ink3); margin-top:6px; line-height:1.6; }
+  .phone-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px; break-inside:avoid; margin:12px 0 16px; }
+  .phone-row img{ width:100%; display:block; border:1px solid var(--line); border-radius:9px; }
+
+  /* ---------- callouts ---------- */
+  .note{ border-left:4px solid var(--blue); background:var(--soft); padding:11px 14px;
+         border-radius:0 8px 8px 0; margin:12px 0; font-size:9.5pt; break-inside:avoid; }
+  .note.warn{ border-left-color:var(--orange); background:#fff7ed; }
+  .note.danger{ border-left-color:var(--red); background:#fef2f2; }
+  .note .lbl{ display:block; font-weight:800; font-size:9pt; margin-bottom:3px; letter-spacing:.02em; }
+  .note.warn .lbl{ color:var(--orange); }
+  .note.danger .lbl{ color:var(--red); }
+  .note .lbl{ color:var(--blue); }
+
+  /* ---------- tables ---------- */
+  table{ width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:9.3pt; break-inside:avoid; }
+  th,td{ border:1px solid var(--line); padding:7px 9px; text-align:left; vertical-align:top; }
+  th{ background:var(--soft); font-weight:800; color:var(--navy); }
+  td.c,th.c{ text-align:center; }
+
+  .badge{ display:inline-block; padding:1px 8px; border-radius:20px; font-size:8.2pt; font-weight:800; }
+  kbd{ background:#fff; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px;
+       padding:1px 7px; font-size:8.8pt; font-weight:700; font-family:inherit; }
+
+  ul,ol{ margin:0 0 10px; padding-left:20px; }
+  li{ margin-bottom:4px; }
+  .qa{ break-inside:avoid; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+  .qa .q{ font-weight:800; color:var(--navy); margin-bottom:5px; }
+  .qa .q::before{ content:"Q"; display:inline-block; width:19px; height:19px; line-height:19px;
+    text-align:center; border-radius:50%; background:var(--navy); color:#fff; font-size:8.6pt; margin-right:8px; }
+  .qa .a{ font-size:9.6pt; padding-left:27px; }
+  .rules{ list-style:none; padding:0; margin:0; counter-reset:r; }
+  .rules li{ counter-increment:r; padding:10px 0 10px 40px; border-bottom:1px solid var(--line);
+             position:relative; break-inside:avoid; }
+  .rules li::before{ content:counter(r); position:absolute; left:0; top:11px;
+    width:25px; height:25px; line-height:25px; text-align:center; border-radius:50%;
+    background:var(--soft); color:var(--blue); font-weight:800; font-size:9.6pt; }
+  .rules b{ display:block; color:var(--navy); }
+  .rules span{ font-size:9.4pt; color:var(--ink2); }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-badge">🏪</div>
+    <h1>FES POS<br>操作説明書</h1>
+    <div class="sub">文化祭 物販管理システム</div>
+    <div class="cover-rule"></div>
+    <p class="lead">
+      スマートフォンがそのままレジになります。<br>
+      商品をタップして、預かり金を入れて、確定するだけ。<br>
+      売上と在庫は自動で計算され、全員の端末にすぐ反映されます。
+    </p>
+  </div>
+  <div class="cover-meta">
+    <b>はじめて使う人へ</b> — <b>3章「ログインのしかた」</b>と<b>4章「レジの使い方」</b>だけ読めば、当日レジに立てます。<br>
+    それ以外は、担当になったときや困ったときに読んでください。
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<section>
+  <h2>もくじ</h2>
+  <ol class="toc">
+    <li><span class="n">1</span><span class="t">このシステムでできること</span><span class="d">何がうれしいのか</span></li>
+    <li><span class="n">2</span><span class="t">使いはじめる準備</span><span class="d">スマホでひらく・ホーム画面に置く</span></li>
+    <li><span class="n">3</span><span class="t">ログインのしかた</span><span class="d">合言葉 → 個人番号 → PIN</span></li>
+    <li><span class="n">4</span><span class="t">レジの使い方</span><span class="d">いちばん大事。ここだけは全員読む</span></li>
+    <li><span class="n">5</span><span class="t">画面の切り替え方</span><span class="d">5つのタブ</span></li>
+    <li><span class="n">6</span><span class="t">それぞれの画面の説明</span><span class="d">受け渡し・売上・在庫・履歴</span></li>
+    <li><span class="n">7</span><span class="t">困ったときは</span><span class="d">よくある質問</span></li>
+    <li><span class="n">8</span><span class="t">当日のお願い</span><span class="d">みんなで守るルール</span></li>
+    <li><span class="n">9</span><span class="t">裏側のしくみ</span><span class="d">興味がある人だけ</span></li>
+  </ol>
+
+  <h2 class="page-break"><span class="num">1</span>このシステムでできること</h2>
+  <p class="sec-lead">紙とノートでやっていた「レジ・在庫管理・売上集計」を、ぜんぶスマホにまとめたものです。</p>
+
+  <table>
+    <tr>
+      <th style="width:34%">できること</th>
+      <th>どういうことか</th>
+    </tr>
+    <tr>
+      <td><b>スマホがレジになる</b></td>
+      <td>商品をタップするだけで合計金額とおつりが自動で出ます。暗算も電卓も要りません。</td>
+    </tr>
+    <tr>
+      <td><b>何台でも同時に使える</b></td>
+      <td>レジを2台3台に増やしても、売上と在庫は自動で共有されます。数秒でおたがいの画面に反映されます。</td>
+    </tr>
+    <tr>
+      <td><b>在庫が自動で減る</b></td>
+      <td>売れた分だけ残数が減ります。残りが少なくなると<b style="color:var(--orange)">オレンジ色の警告</b>が出て、売り切れた商品はボタンが押せなくなります。</td>
+    </tr>
+    <tr>
+      <td><b>売上がその場で見える</b></td>
+      <td>今いくら売れたか、何がよく売れているか、どの時間帯が忙しいかがグラフで分かります。</td>
+    </tr>
+    <tr>
+      <td><b>誰が操作したか残る</b></td>
+      <td>会計・取消・在庫補充などの操作は、全部「誰が・いつ・何をしたか」が記録されます。お金のトラブルを防ぐためです。</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <span class="lbl">安心してください</span>
+    操作を間違えても、あとから取り消せます。また、在庫より多く売ってしまうような操作は、システム側が自動でブロックします。
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="page-break">
+  <h2><span class="num">2</span>使いはじめる準備</h2>
+  <p class="sec-lead">スマホのブラウザを開くだけで使えます。管理者がAndroid用のアプリを用意していれば、それも使えます。</p>
+
+  <h3>アドレス</h3>
+  <p>スマホのブラウザ（iPhoneならSafari、AndroidならChrome）で、管理者から教えてもらったアドレスを開きます。</p>
+  <p style="text-align:center; font-size:13pt; font-weight:800; color:var(--blue);
+            background:var(--soft); padding:14px; border-radius:10px; margin:10px 0 16px;">
+    https://＿＿＿＿＿＿＿＿＿＿＿＿.onrender.com
+  </p>
+
+  <h3>ホーム画面に置いておくと便利です</h3>
+  <p>毎回アドレスを入力するのは大変なので、ホーム画面にアイコンを置いておくことを強くおすすめします。ふつうのアプリと同じように開けるようになり、アドレスバーも消えて画面が広く使えます。</p>
+
+  <table>
+    <tr><th style="width:26%">iPhone / iPad</th>
+        <td>Safariで開く → 下の <kbd>共有</kbd>（□に↑のマーク）→ <kbd>ホーム画面に追加</kbd></td></tr>
+    <tr><th>Android</th>
+        <td>Chromeで開く → 右上の <kbd>⋮</kbd> → <kbd>ホーム画面に追加</kbd><br>
+            （管理者が用意していれば、下の<b>専用アプリ</b>を入れる方法もあります）</td></tr>
+  </table>
+
+  <h3>Android用のアプリ（管理者が用意した場合）</h3>
+  <p>管理者がAndroid用のアプリを用意している場合は、<b>「FES POS」というアプリ</b>を入れて使うこともできます。ホーム画面の <b>FES POS</b> アイコンをタップするだけで開けて、ブラウザのアドレスバーやタブに邪魔されません。レジ係をする人にはこちらがおすすめです。</p>
+
+  <table>
+    <tr><th style="width:26%">入れ方</th>
+        <td>
+          <ol style="margin:0; padding-left:18px;">
+            <li>担当からアプリのファイル（<b>app-debug.apk</b>）をLINEなどで受け取る</li>
+            <li>ファイルをタップして開く</li>
+            <li>「提供元不明のアプリ」の警告が出たら <kbd>設定</kbd> → <kbd>この提供元のアプリを許可</kbd> をオンにする</li>
+            <li><kbd>インストール</kbd> を押す → ホーム画面に <b>FES POS</b> のアイコンが増える</li>
+          </ol>
+        </td></tr>
+    <tr><th>中身</th>
+        <td>ブラウザ版と<b>まったく同じ</b>です。操作方法もログインも、この説明書のとおりです。</td></tr>
+    <tr><th>更新</th>
+        <td>入れ直しは不要です。修正はアプリを開いたときに自動で反映されます。</td></tr>
+  </table>
+
+  <div class="note">
+    <span class="lbl">警告が出ても大丈夫です</span>
+    このアプリは文化祭のために作ったもので、Google Playストアを通さずに直接配っています。そのためインストール時に「提供元不明」「安全でない可能性」といった警告が出ますが、ストアに載っていないというだけの意味です。<b>担当から受け取ったファイル以外は入れないでください。</b>
+  </div>
+
+  <div class="note">
+    <span class="lbl">iPhoneの人は</span>
+    iPhone用のアプリはありません。上の手順でSafariからホーム画面に追加すると、アプリとほぼ同じように使えます。
+  </div>
+
+  <div class="note warn">
+    <span class="lbl">ネット接続が必要です</span>
+    このシステムは常にインターネットにつながっている必要があります。全員の売上・在庫をリアルタイムで共有しているためです。教室の電波が不安な場所では、事前につながるか確認しておいてください。
+  </div>
+
+  <div class="note">
+    <span class="lbl">更新は自動です</span>
+    当日に不具合が見つかって修正した場合も、アプリを入れ直す必要はありません。次に開いたときに自動で最新版になります。
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="page-break">
+  <h2><span class="num">3</span>ログインのしかた</h2>
+  <p class="sec-lead">4つのステップです。2回目からは合言葉とPINだけなので、10秒で終わります。</p>
+
+  <div class="step">
+    <div class="step-body">
+      <h4><span class="step-num">1</span>合言葉を入力する</h4>
+      <p>クラス共通の合言葉を入れて <kbd>入場する</kbd> を押します。関係のない人が開けないようにするための入口です。</p>
+      <p>合言葉は担当者から直接聞いてください（この説明書には書きません）。</p>
+      <div class="note danger" style="margin:8px 0 0; font-size:9pt;">
+        <span class="lbl">他のクラスの人に教えないこと</span>
+        合言葉が漏れると、売上データを見られたり書き換えられたりする可能性があります。
+      </div>
+    </div>
+    <div class="shot"><img src="images/01-accesscode.png" alt="合言葉の入力画面"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-body">
+      <h4><span class="step-num">2</span>自分の個人番号を入れる</h4>
+      <p>出席番号ではなく、<b>4桁の個人番号</b>です（例：2年3組1番なら 2301。分からなければ管理者に聞いてください）。自分の番号を入れて <kbd>次へ</kbd> を押します。</p>
+      <p>番号を入れると、次の画面に自分の名前が出ます。名前が違っていたら番号の入力ミスなので、<kbd>番号を変更</kbd> で戻ってください。</p>
+    </div>
+    <div class="shot"><img src="images/02-login-id.png" alt="個人番号の入力画面"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-body">
+      <h4><span class="step-num">3</span>【初回だけ】PINを決める</h4>
+      <p>はじめてログインするときだけ、この画面が出ます。好きな<b>4桁の数字</b>を決めて、確認用にもう一度同じ数字を入れます。</p>
+      <p>これが次回からのあなた専用の暗証番号になります。<b>忘れないものにしてください。</b></p>
+      <p>設定したPINは、<b>管理者が承認すると使えるようになります</b>（「管理者の承認待ちです」と出ます）。管理者に声をかけ、承認されたらもう一度同じPINで入室してください。</p>
+    </div>
+    <div class="shot"><img src="images/03-login-pinset.png" alt="初回ログイン時のPIN設定画面"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-body">
+      <h4><span class="step-num">4</span>【2回目から】PINを入力する</h4>
+      <p>名前が合っていることを確認して、自分で決めた4桁のPINを入れ、<kbd>入室する</kbd> を押します。</p>
+      <p>これでレジ画面が開きます。</p>
+    </div>
+    <div class="shot"><img src="images/04-login-pin.png" alt="PIN入力画面"></div>
+  </div>
+
+  <div class="note danger">
+    <span class="lbl">PINは絶対に人に教えないでください</span>
+    会計・取消などの操作はすべて「誰がやったか」が記録に残ります。PINを他人に教えると、その人の操作があなたの名前で記録されてしまいます。<br>
+    <b>PINを忘れてしまった場合</b>は、管理者に言えばリセットしてもらえます。自分では戻せません。
+  </div>
+
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="page-break">
+  <h2><span class="num">4</span>レジの使い方</h2>
+  <p class="sec-lead">ここがいちばん大事です。当日レジに立つ人は、ここだけ覚えれば大丈夫。</p>
+
+  <div class="step">
+    <div class="step-body">
+      <h4>まず画面の見方</h4>
+      <p>上半分が<b>商品ボタン</b>、下半分が<b>カート</b>です。</p>
+      <p>それぞれの商品ボタンには、右上に <b>残○</b> と現在の在庫数が出ています。</p>
+      <ul style="font-size:9.5pt; margin-top:8px;">
+        <li><b style="color:var(--orange)">オレンジ色で「残りわずか」</b>＝在庫が少ない。補充の合図</li>
+        <li><b style="color:var(--ink3)">灰色で「売切」</b>＝在庫ゼロ。ボタンが押せなくなります</li>
+      </ul>
+    </div>
+    <div class="shot"><img src="images/05-register-empty.png" alt="レジ画面"></div>
+  </div>
+
+  <div class="step rev">
+    <div class="shot"><img src="images/06-register-cart.png" alt="カートに商品が入った状態"></div>
+    <div class="step-body">
+      <h4><span class="step-num">1</span>商品をタップする</h4>
+      <p>売れた商品のボタンをタップします。タップするたびに1個ずつカートに入ります。たこ焼き2個なら2回タップ。</p>
+      <p>画面を下にスクロールするとカートが見えます。ここで間違いに気づいたら:</p>
+      <ul style="font-size:9.5pt;">
+        <li><kbd>−</kbd> <kbd>＋</kbd> で数を増減できます</li>
+        <li>右端の<b>ゴミ箱</b>でその商品を取り消せます</li>
+      </ul>
+      <p>合計金額が合っていることを確認して、緑色の <kbd>会計へ進む</kbd> を押します。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-body">
+      <h4><span class="step-num">2</span>お客様から受け取った金額を入れる</h4>
+      <p>「お会計」の画面が出ます。上に商品の一覧と<b>合計金額</b>が表示されます。</p>
+      <p>お客様から預かった金額を「預かり金額」に入力します。よく使う金額はボタンで入れられます。</p>
+      <ul style="font-size:9.5pt;">
+        <li><kbd>ちょうど</kbd> … 合計と同じ額（おつりなし）</li>
+        <li><kbd>¥1,000</kbd> <kbd>¥5,000</kbd> <kbd>¥10,000</kbd> … その金額を一発入力</li>
+      </ul>
+    </div>
+    <div class="shot"><img src="images/07-checkout-empty.png" alt="お会計画面"></div>
+  </div>
+
+  <div class="step rev">
+    <div class="shot"><img src="images/08-checkout-change.png" alt="おつりが表示された状態"></div>
+    <div class="step-body">
+      <h4><span class="step-num">3</span>おつりを確認して渡す</h4>
+      <p>金額を入れると、下に<b>お釣り</b>が大きく緑色で出ます。この金額をお客様にお返しします。</p>
+      <p>預かった金額が足りないときは、赤い字で <b style="color:var(--red)">不足 ¥○○</b> と出て、確定ボタンが押せません。もう一度金額を確認してください。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-body">
+      <h4><span class="step-num">4</span>確定する</h4>
+      <p>おつりを渡したら <kbd>会計を確定する</kbd> を押します。「会計完了！ ○番」と出て、カートが空になります。</p>
+      <p><b>その番号（注文番号）をお客様に伝えます。</b>商品は、受け渡しの係が番号を呼んで渡します（6章）。番号はカートの上の「前回 ○番」でも確かめられます。</p>
+      <p>この瞬間に、売上と在庫がすべての端末に反映されます。次のお客様をどうぞ。</p>
+      <div class="note warn" style="margin:8px 0 0; font-size:9pt;">
+        <span class="lbl">確定は最後に</span>
+        確定を押す前にお金のやりとりを済ませてください。確定後の取り消しは管理者しかできません。
+      </div>
+    </div>
+    <div class="shot"><img src="images/21-checkout-number.jpg" alt="会計完了と注文番号"></div>
+  </div>
+
+  <div class="note">
+    <span class="lbl">連打しても大丈夫です</span>
+    確定ボタンを何度も押してしまっても、二重に会計されることはありません。同じように、2台のレジが同時に最後の1個を売ってしまうこともシステムが防いでいます。
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="page-break">
+  <h2><span class="num">5</span>画面の切り替え方</h2>
+  <p class="sec-lead">スマホは画面の一番下、パソコンは左側のメニューから切り替えます。</p>
+
+  <figure>
+    <img src="images/11-register-desktop.png" alt="パソコンで開いたときの画面">
+    <figcaption>パソコンで開くと、左側にメニューが出ます。中身はスマホと同じです。左下には今ログインしている人の名前と、<b>ダークモード</b>・<b>今すぐ同期</b>・<b>退室する</b>のボタンがあります。画面は<b>8秒ごとに自動で最新になる</b>ので、<kbd>今すぐ同期</kbd> はすぐに最新にしたいときだけ押せば十分です。</figcaption>
+  </figure>
+
+  <h3>5つのタブ</h3>
+  <table>
+    <tr><th style="width:18%">タブ</th><th>何ができるか</th></tr>
+    <tr><td><b>レジ</b></td><td>会計をする。いつも使う画面</td></tr>
+    <tr><td><b>受け渡し</b></td><td>会計した注文（番号と商品）を見て、お客様に商品を渡す</td></tr>
+    <tr><td><b>売上</b></td><td>今日いくら売れたか、何が売れているかを見る</td></tr>
+    <tr><td><b>在庫</b></td><td>商品ごとの残りの数を見る</td></tr>
+    <tr><td><b>履歴</b></td><td>これまでの会計の一覧を見る</td></tr>
+  </table>
+
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="page-break">
+  <h2><span class="num">6</span>それぞれの画面の説明</h2>
+  <p class="sec-lead">担当になったときに読めば十分です。</p>
+
+  <h3>受け渡し — 会計した注文を渡す</h3>
+  <div class="step">
+    <div class="step-body">
+      <p>会計と商品を渡す場所が別のとき、受け渡しの係はこの画面を開いておきます。<b>どのレジで会計しても、数秒で注文が出ます</b>（番号と商品と個数。新しい注文は枠が光り、スマホが振動します）。</p>
+      <ol style="font-size:9.5pt;">
+        <li>お客様に番号を聞く（または番号を呼ぶ）</li>
+        <li>その番号の商品を渡す</li>
+        <li><kbd>渡した</kbd> を押す → 一覧から消える</li>
+      </ol>
+      <p style="font-size:9.5pt;">間違えて押したときは、下の「さっき渡した注文」から <kbd>戻す</kbd> で戻せます（15分以内）。<kbd>音なし</kbd> を押すと、新しい注文のときに音が鳴るようになります。この画面を開いている間は、スマホの画面が消えにくくなります。</p>
+    </div>
+    <div class="shot"><img src="images/20-handover.jpg" alt="受け渡し画面"></div>
+  </div>
+
+  <h3>売上 — 今どれだけ売れているか</h3>
+  <figure>
+    <img src="images/12-dashboard.png" alt="売上ダッシュボード">
+    <figcaption>いちばん上の大きい数字が<b>本日の売上</b>。その下に取引数・粗利（もうけ）・粗利率が並びます。左のグラフは<b>どの商品が売れているか</b>、右のグラフは<b>どの時間帯が忙しいか</b>。右上の <kbd>取引明細</kbd> <kbd>商品別集計</kbd> からCSVファイル（Excelで開ける表）に書き出せます。</figcaption>
+  </figure>
+
+  <h3>在庫 — 残りがどれだけあるか</h3>
+  <figure>
+    <img src="images/13-inventory.png" alt="在庫管理画面">
+    <figcaption>商品ごとに「残り ○ / 全体」とバーで表示されます。残りが少なくなると<b style="color:var(--orange)">「残りわずか」</b>のオレンジ表示になります（上の例ではチョコバナナ）。そうなったら管理者に声をかけて、補充の相談をしてください。</figcaption>
+  </figure>
+</section>
+
+<section class="page-break">
+  <h3>履歴 — 会計の一覧と、間違えたときの取消</h3>
+  <figure>
+    <img src="images/15-history.png" alt="取引履歴">
+    <figcaption>新しい会計が上から順に並びます。金額・時刻・担当者・売れた商品・預かり金・おつりが記録されています。</figcaption>
+  </figure>
+
+  <h4>間違えて会計してしまったら</h4>
+  <p>自分で直そうとせず、すぐ管理者に声をかけてください。取り消された会計は、下のように表示されます。</p>
+  <figure>
+    <img src="images/19-history-voided.png" alt="取消済の取引">
+    <figcaption>取り消した会計は、金額に取り消し線が引かれて <b style="color:var(--red)">取消済</b> と表示されます。売上にも在庫にも数えられなくなりますが、「取り消した」という事実はきちんと残ります。</figcaption>
+  </figure>
+
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="page-break">
+  <h2><span class="num">7</span>困ったときは</h2>
+  <p class="sec-lead">当日よくある場面をまとめました。システムが止まったときの詳しい対応は、別紙の<b>「障害対応手順書」</b>にあります。</p>
+
+  <div class="qa">
+    <div class="q">画面の上に赤い帯が出た</div>
+    <div class="a">サーバーとつながっていない合図です。表示されている在庫や売上は古い可能性があります。
+      <b>「この端末がインターネットにつながっていません」</b>ならあなたのスマホの電波の問題なので、Wi-Fiやモバイルデータを確認してください。
+      <b>「サーバーに接続できません」</b>なら管理者に伝えて、帯の <kbd>再接続</kbd> を押してみてください。
+      会計できない状態が3分続いたら、<b>紙に記録して営業を続けます</b>（障害対応手順書の1章）。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">会計を押したら「通信が途切れました」と出た</div>
+    <div class="a">会計が記録されたかどうか分からない状態です。<b>カートはそのままで、もう一度「会計を確定する」を押してください。</b>
+      1回目がじつは記録されていても、二重には記録されません（そのときは「先ほどの送信で記録済みでした」と出ます）。
+      ただし、<b>別のスマホやページの読み込み直しのあとで打ち直すと二重になる</b>ので、それはしないでください。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">「在庫が不足しています」と出て会計できない</div>
+    <div class="a">本当に在庫が無くなっています。他のレジが先に売った可能性もあります。現物を確認して、まだあるなら管理者に<b>在庫の補充</b>をお願いしてください。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">間違えて会計を確定してしまった</div>
+    <div class="a">あわてずに管理者を呼んでください。取り消してもらえば、売上も在庫も自動的に元に戻ります。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">他のレジで売れたはずなのに、在庫の数が減っていない</div>
+    <div class="a">画面の更新待ちです。最大8秒で自動的に新しくなります。急ぐときは <kbd>今すぐ同期</kbd> を押してください。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">PINを忘れてログインできない</div>
+    <div class="a">管理者に伝えてください。次のログインで新しいPINを決め直せるようにしてもらえます。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">「試行回数が多すぎます」と出た</div>
+    <div class="a">PINを5回続けて間違えたため、5分間ロックされています。5分待てば自動的に解除されます。それまでは正しいPINを入れても通りません。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">画面が真っ白／読み込みが終わらない</div>
+    <div class="a">電波を確認して、ページを再読み込み（引っぱって更新）してください。それでもダメなら、いったんブラウザを閉じて開き直します。<b>会計済みのデータが消えることはありません</b>ので安心してください。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">急に画面が暗くなった／明るくなった</div>
+    <div class="a">ダークモードの切り替えです。スマホでは右上の月・太陽のマーク、パソコンでは左下のボタンで戻せます。表示が変わるだけで、データには影響しません。</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">スマホの充電が切れそう</div>
+    <div class="a">別の端末でログインすれば、そのまま続けられます。データはすべてサーバー側にあるので、端末を替えても何も失われません。モバイルバッテリーを用意しておくと安心です。</div>
+  </div>
+
+  <div class="qa" style="border-bottom:none">
+    <div class="q">レジを他の人に交代する</div>
+    <div class="a">必ず <kbd>退室する</kbd> でログアウトしてから交代してください。そのまま渡すと、あなたの名前で記録が残り続けてしまいます。</div>
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="page-break">
+  <h2><span class="num">8</span>当日のお願い</h2>
+  <p class="sec-lead">お金を扱うので、この6つだけは守ってください。</p>
+
+  <ol class="rules">
+    <li><b>必ず自分の個人番号でログインする</b>
+        <span>人の番号を借りないでください。記録がその人のものになってしまい、あとで金額が合わないときに原因が追えなくなります。</span></li>
+    <li><b>PINは誰にも教えない</b>
+        <span>友達にもです。教えてしまったら、管理者に言って設定し直してください。</span></li>
+    <li><b>確定を押す前に、お金のやりとりを終える</b>
+        <span>「先に確定 → お客様が財布を忘れた」が一番面倒です。おつりを渡してから確定しましょう。</span></li>
+    <li><b>間違えたら、すぐ管理者を呼ぶ</b>
+        <span>自分で直そうとせず声をかけてください。早いほど簡単に直せます。隠すのがいちばん困ります。</span></li>
+    <li><b>レジを離れるときは退室する</b>
+        <span>置きっぱなしにすると、誰でもあなたの名前で操作できてしまいます。</span></li>
+    <li><b>システムが止まっても、お店は止めない</b>
+        <span>3分直らなければ、紙の記録用紙に書いて営業を続けます。お金はいつも通り受け取り、おつりもいつも通り渡します。紙の分はあとで管理者が入力するので、売上も在庫も元通りになります。</span></li>
+  </ol>
+
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="page-break">
+  <h2><span class="num">9</span>裏側のしくみ</h2>
+  <p class="sec-lead">興味がある人向けです。読まなくても使えます。</p>
+
+  <h3>お金がずれないようにしている工夫</h3>
+  <table>
+    <tr><th style="width:32%">工夫</th><th>なぜそうしているか</th></tr>
+    <tr><td><b>金額はスマホ側で計算しない</b></td>
+        <td>合計金額はサーバー側で商品の値段から計算し直しています。スマホから送られてきた金額をそのまま信じると、細工された金額で会計できてしまうからです。</td></tr>
+    <tr><td><b>在庫のチェックは「順番待ち」で行う</b></td>
+        <td>2台のレジが同時に最後の1個を売ろうとしたとき、片方が終わるまでもう片方を待たせています。これがないと在庫がマイナスになります。</td></tr>
+    <tr><td><b>PINは元に戻せない形で保存</b></td>
+        <td>PINは暗号化して保存しているため、データベースを見ても数字は分かりません。管理者でも他人のPINは見られません。</td></tr>
+    <tr><td><b>権限をサーバー側でも確認</b></td>
+        <td>管理者用のボタンを隠すだけでなく、サーバー側でも「本当に管理者か」を毎回確かめています。画面をいじっても突破できません。</td></tr>
+    <tr><td><b>操作ログは消せない</b></td>
+        <td>会計・取消などの記録は残り続けます。あとから「誰が何をしたか」を確認できるようにするためです。</td></tr>
+  </table>
+
+  <h3>使っている技術</h3>
+  <p style="font-size:9.5pt">
+    画面は <b>React</b>、サーバーは <b>Node.js</b>（tRPC）、データの保存は <b>TiDB</b> というクラウド上のデータベースです。
+    サーバーは <b>Render</b> というサービスで24時間動いています。
+    デザインは <b>HarmonyOS</b> の動きの設計を参考にしていて、ボタンを押したときの反応やカードの動きはすべて実機の値をもとに調整しています。
+  </p>
+
+  <div class="note" style="margin-top:22px">
+    <span class="lbl">このシステムについて</span>
+    文化祭のクラスの物販のために作られたシステムです。
+    使ってみて「ここが使いにくい」「こうだったらいいのに」と思ったところがあれば、管理者に伝えてください。
+  </div>
+</section>
+
+</body>
+</html>
