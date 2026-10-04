@@ -437,18 +437,21 @@
 
 <div class="step">
   <div class="step-body">
-    <h4><span class="step-num">5</span>レジの画面が出たら完了</h4>
+    <h4><span class="step-num">5</span>レジの画面が出たら成功（次の6を忘れずに）</h4>
     <p>右上に自分の番号と「管理者」が出ていれば成功です。次からは、番号とPINだけで入れます。</p>
     <p>まだ商品が無いので、レジには案内だけが出ています。商品は8章で登録します。</p>
   </div>
   <div class="shot"><img src="images/s05-empty-register.jpg" alt=""><div class="cap">管理者でログインしたところ</div></div>
 </div>
 
-<div class="note">
-  <span class="lbl">後片付け（おすすめ）</span>
-  使い終わった復旧コードは消しておくと安全です。Render の <kbd>Environment</kbd> で <code>POS_ADMIN_RECOVERY_CODE</code> の
-  ごみ箱マークを押し、<kbd>Save Changes</kbd> を押します（アプリが1〜2分で再起動します）。<br>
-  あとで管理者がPINを忘れたときは、同じ名前で、16文字以上のでたらめな英数字を新しく追加すれば、もう一度この手順が使えます。
+<div class="note danger">
+  <span class="lbl">6. 復旧コードを消す（必ずやる）</span>
+  PINが決まったら、<b>すぐに復旧コードを消してください。</b>残しておくと、コードを知った人（画面写真やLINEで見た人など）が
+  管理者のPINを勝手に変えて、<b>管理者になりすませます</b>。<br>
+  Render の <kbd>Environment</kbd> で <code>POS_ADMIN_RECOVERY_CODE</code> の右のごみ箱マークを押し、<kbd>Save Changes</kbd> を押します
+  （アプリが1〜2分で再起動します）。ログイン画面に「管理者の復旧コードを使う」が出なくなれば消えています。<br>
+  コードは人に送ったり、写真に撮ったりしないでください。あとで管理者がPINを忘れたときは、同じ名前で16文字以上のでたらめな英数字を
+  新しく追加すれば、もう一度この手順が使えます（使い終わったら、また消します）。
 </div>
 
 <!-- ============ 7 ============ -->
@@ -544,8 +547,9 @@
 
 <h3>そのほかの準備</h3>
 <ul class="check">
-  <li><b>会計係を決める</b>（PINタブの「会計係」）— 管理者のほかに、釣り銭の登録・締めができる人</li>
-  <li><b>操作説明書と障害対応手順書を印刷して配る</b>（<code>docs</code> フォルダのPDF。障害対応手順書の最後に、アドレスを書く欄があります）</li>
+  <li><b>復旧コードを消した</b>（6章の6）</li>
+  <li><b>会計係を決める</b>（PINタブの「会計係」）— 釣り銭の登録・締めができる人</li>
+  <li><b>操作説明書と障害対応手順書を印刷して配る</b>（<code>docs</code> のPDF。障害対応手順書の最後にアドレスを書く）</li>
   <li><b>本番の前日までに通し練習</b>（スマホ2台以上で同時に会計・受け渡し・取消を試す）</li>
   <li><b>当日の朝</b>：開店の5〜10分前にアプリを開く → 売上タブで<b>釣り銭を登録</b> → 営業開始</li>
 </ul>
@@ -628,7 +632,7 @@
 
 <div class="qa"><div class="q">管理者がPINを忘れた</div><div class="a">
   <p>Render の <kbd>Environment</kbd> で <code>POS_ADMIN_RECOVERY_CODE</code> を追加（16文字以上のでたらめな英数字）して保存し、
-  6章の3〜5の手順でPINを決め直します。終わったら消しておきます。</p>
+  6章の3〜5の手順でPINを決め直します。<b>終わったら必ず消します</b>（6章の6）。</p>
 </div></div>
 
 <div class="qa"><div class="q">メンバーがPINを忘れた・申請コードが分からなくなった</div><div class="a">
@@ -660,7 +664,7 @@
   <tr><td><code>POS_ACCESS_CODE</code></td><td>合言葉</td><td class="c must">必要</td></tr>
   <tr><td><code>POS_SHOP_NAME</code></td><td>店の名前（ログイン画面に表示）</td><td class="c">あるとよい</td></tr>
   <tr><td><code>JWT_SECRET</code></td><td>ログインの記録に付ける署名の鍵。32文字以上。変えると全員ログインし直し</td><td class="c auto">自動</td></tr>
-  <tr><td><code>POS_ADMIN_RECOVERY_CODE</code></td><td>管理者が最初のPINを決める・忘れたPINを決め直すためのコード。16文字以上。使い終わったら消してよい</td><td class="c auto">自動</td></tr>
+  <tr><td><code>POS_ADMIN_RECOVERY_CODE</code></td><td>管理者が最初のPINを決める・忘れたPINを決め直すためのコード。16文字以上。<b>最初のPINを決めたら必ず消す</b></td><td class="c auto">自動</td></tr>
   <tr><td><code>NODE_VERSION</code></td><td>プログラムを動かす道具のバージョン。変えない</td><td class="c auto">自動</td></tr>
   <tr><td><code>TURNSTILE_SITE_KEY</code><br><code>TURNSTILE_SECRET_KEY</code></td><td>ロボットよけの確認（Cloudflare）を付けるときだけ。2つそろえて設定する</td><td class="c">なくてよい</td></tr>
 </table>
