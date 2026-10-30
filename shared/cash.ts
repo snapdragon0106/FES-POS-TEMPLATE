@@ -8,6 +8,7 @@
  * count record) and the screens (which show it live), so the figure on
  * the 売上 tab and the one saved at closing can never disagree.
  */
+import { jstDate } from "./stockSchedule";
 
 // Largest first — the order change is counted out in.
 export const DENOMINATIONS = [10000, 5000, 1000, 500, 100, 50, 10, 5, 1] as const;
@@ -99,6 +100,15 @@ export type DrawerState = {
 
 const time = (d: Date | string) => new Date(d).getTime();
 
+// TIMESTAMP columns have second precision. A count/return from the old
+// day can share its timestamp with the next float; the cash-event id is
+// the tie breaker, just as it is when choosing the latest float.
+function afterFloat(event: CashEventLike, float: CashEventLike): boolean {
+  const at = time(event.createdAt);
+  const start = time(float.createdAt);
+  return at > start || (at === start && event.id > float.id);
+}
+
 /** Cash sales only: cashless sales raise takings without a yen in the box. */
 export function isCashSale(t: TransactionLike): boolean {
   return !t.voided && (t.paymentMethod ?? "cash") === "cash";
@@ -124,18 +134,17 @@ export function computeDrawer(events: CashEventLike[], transactions: Transaction
     .filter((t) => isCashSale(t) && time(t.createdAt) >= start)
     .reduce((s, t) => s + t.total, 0);
   const sumOf = (kind: CashEventKind) =>
-    events.filter((e) => e.kind === kind && time(e.createdAt) >= start).reduce((s, e) => s + e.amount, 0);
+    events.filter((e) => e.kind === kind && afterFloat(e, current)).reduce((s, e) => s + e.amount, 0);
   const collected = sumOf("collect");
   // A 両替 swaps notes for coins of the same total: it changes what is in
   // the box, not how much (computeCoins follows it).
   const returned = sumOf("return");
   const closedBy =
     events
-      .filter((e) => e.kind === "count" && time(e.createdAt) >= start)
+      .filter((e) => e.kind === "count" && afterFloat(e, current))
       .sort((a, b) => time(b.createdAt) - time(a.createdAt) || b.id - a.id)[0] ?? null;
 
-  const dayStart = new Date(start);
-  dayStart.setHours(0, 0, 0, 0);
+  const dayStart = new Date(`${jstDate(start)}T00:00:00+09:00`);
   const salesBeforeFloat = transactions
     .filter((t) => isCashSale(t) && time(t.createdAt) >= dayStart.getTime() && time(t.createdAt) < start)
     .reduce((s, t) => s + t.total, 0);
@@ -487,7 +496,7 @@ export function computeCoins(events: CashEventLike[], transactions: TransactionL
   }
   let closed = false;
   for (const e of events) {
-    if (e.id === current.id || time(e.createdAt) < start) continue;
+    if (!afterFloat(e, current)) continue;
     steps.push({
       at: time(e.createdAt),
       order: 1,

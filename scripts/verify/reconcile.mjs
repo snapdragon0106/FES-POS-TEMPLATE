@@ -25,6 +25,9 @@ import { randomUUID } from "crypto";
 
 const BASE = process.env.BASE ?? "http://localhost:3200";
 const SALES = Number(process.env.SALES ?? 60);
+// A valid maximum-length Japanese note used to overflow the generated
+// activity log's VARCHAR(255), after the cash event had already committed.
+const LONG_NOTE = "確認".repeat(126) + "済み！";
 let failures = 0;
 const check = (ok, msg) => { console.log(ok ? "  OK  " : "  FAIL", msg); if (!ok) failures++; };
 
@@ -206,11 +209,11 @@ check(later.data?.availableOn === tomorrow, `restock +1000 scheduled for ${tomor
 const expectedBefore = 18000 + live().reduce((s, t) => s + t.total, 0);
 check((await m("cash.collect", { amount: expectedBefore * 10 }, CASHIER)).error?.includes("より多い"), "oversized collection refused");
 const COLLECT = 5000;
-check(!(await m("cash.collect", { amount: COLLECT, note: "reconcile" }, CASHIER)).error, `collected ¥${COLLECT}`);
+check(!(await m("cash.collect", { amount: COLLECT, note: LONG_NOTE }, CASHIER)).error, `collected ¥${COLLECT} with a 255-character note`);
 
 // 両替: notes out, coins in, same total — the drawer's total must not move.
 check((await m("cash.exchange", { out: { "1000": 2 }, in: { "100": 19 } }, CASHIER)).error?.includes("合っていません"), "unbalanced 両替 refused");
-check(!(await m("cash.exchange", { out: { "1000": 2 }, in: { "100": 20 }, note: "reconcile" }, CASHIER)).error, "両替 ¥2,000 recorded");
+check(!(await m("cash.exchange", { out: { "1000": 2 }, in: { "100": 20 }, note: LONG_NOTE }, CASHIER)).error, "両替 ¥2,000 recorded with a 255-character note");
 
 // ---- 6. Compare everything with the ledger ----
 const txs = (await q("transaction.list", null, ADMIN)).data.filter((t) => t.items.some((it) => ids.has(it.product_id)));
@@ -261,7 +264,7 @@ check(drawerExpected === ledgerDrawer, `drawer expected ¥${drawerExpected} = fl
 const breakdown = {};
 let left = ledgerDrawer;
 for (const d of [10000, 5000, 1000, 500, 100, 50, 10, 5, 1]) { const n = Math.floor(left / d); if (n) breakdown[d] = n; left -= n * d; }
-const count = await m("cash.count", { breakdown, note: "reconcile" }, CASHIER);
+const count = await m("cash.count", { breakdown, note: LONG_NOTE }, CASHIER);
 check(count.data?.expected === ledgerDrawer && count.data?.difference === 0, `締め: counted ¥${count.data?.counted}, expected ¥${count.data?.expected}, difference ${count.data?.difference}`);
 check((await m("cash.collect", { amount: 100 }, CASHIER)).code === "CONFLICT", "no collection after 締め");
 
@@ -270,7 +273,7 @@ check((await m("cash.collect", { amount: 100 }, CASHIER)).code === "CONFLICT", "
 // drops by exactly what went back.
 check((await m("cash.returnFloat", { amount: 18001 }, CASHIER)).error?.includes("より多い"), "returning more than the float refused");
 check(!(await m("cash.returnFloat", { amount: 8000 }, CASHIER)).error, "returned ¥8,000 of the float");
-const back = await m("cash.returnFloat", { amount: 10000, note: "reconcile" }, CASHIER);
+const back = await m("cash.returnFloat", { amount: 10000, note: LONG_NOTE }, CASHIER);
 check(back.data?.returned === 18000 && back.data?.float === 18000, `float returned in full (${back.data?.returned}/${back.data?.float})`);
 check((await m("cash.returnFloat", { amount: 1 }, CASHIER)).error?.includes("返却済み"), "nothing more to return");
 {
@@ -302,6 +305,8 @@ check(has("cash_float", "用意：照合テストの担任") && has("cash_collec
 check(has("restock") && has("cash_managers"), "restocks and the 会計係 change logged");
 check((await m("activityLog.create", { action: "reset_all", detail: "fake" }, CASHIER)).code === "NOT_FOUND", "no API to write the log directly");
 check(has("cash_exchange", "千円札2枚 → 100円玉20枚") && has("cash_return", "残り ¥10,000") && has("cash_return", "全額返却済み"), "両替 and both returns logged");
+check(["cash_collect", "cash_exchange", "cash_count", "cash_return"].every((action) => has(action, LONG_NOTE)),
+  "maximum-length notes preserved in full in every generated cash log");
 
 // Cashier can't read the admin's data.
 check((await q("activityLog.list", null, CASHIER)).code === "FORBIDDEN", "cashier can't read the audit log");

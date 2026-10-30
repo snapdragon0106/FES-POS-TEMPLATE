@@ -121,7 +121,7 @@ async function ensureCoreTables(db: NonNullable<typeof _db>): Promise<void> {
         operator VARCHAR(10) NOT NULL,
         operatorName VARCHAR(50) NOT NULL DEFAULT '',
         action VARCHAR(30) NOT NULL,
-        detail VARCHAR(255) DEFAULT NULL,
+        detail TEXT DEFAULT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id)
@@ -162,6 +162,17 @@ async function ensurePinColumnWidth(db: NonNullable<typeof _db>): Promise<void> 
     console.log("[Migration] member_pins.pin column is VARCHAR(255) or wider.");
   } catch (error) {
     console.error("[Migration] Failed to widen member_pins.pin column:", error);
+  }
+}
+
+/** Preserve full notes and bulk-operation details on existing databases. */
+async function ensureActivityLogDetail(db: NonNullable<typeof _db>): Promise<void> {
+  try {
+    await db.execute(sql`ALTER TABLE activity_logs MODIFY COLUMN detail TEXT`);
+    console.log("[Migration] activity_logs.detail column is TEXT.");
+  } catch (error) {
+    console.error("[Migration] Failed to widen activity_logs.detail column:", error);
+    throw error;
   }
 }
 
@@ -224,7 +235,7 @@ async function ensureTimestampColumns(db: NonNullable<typeof _db>): Promise<void
     // Other columns the app's schema expects that older versions of these
     // tables may not have had. All harmless no-ops if already present.
     await db.execute(sql`ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS operatorName VARCHAR(50) NOT NULL DEFAULT ''`);
-    await db.execute(sql`ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS detail VARCHAR(255)`);
+    await db.execute(sql`ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS detail TEXT`);
     await db.execute(sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS threshold INT NOT NULL DEFAULT 10`);
     await db.execute(sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS displayOrder INT NOT NULL DEFAULT 0`);
     await db.execute(sql`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS voided BOOLEAN NOT NULL DEFAULT FALSE`);
@@ -449,6 +460,7 @@ export async function getDb() {
         await ensurePinColumnWidth(db);
         await ensureAccountingTable(db);
         await ensureTimestampColumns(db);
+        await ensureActivityLogDetail(db);
         await ensurePaymentTables(db);
         await ensureCheckoutIdempotency(db);
         await ensureProductImages(db);
