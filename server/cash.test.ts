@@ -82,6 +82,41 @@ describe("computeDrawer", () => {
     const d = computeDrawer([ev(1, "float", 10000, "09:00"), ev(2, "count", 10400, "17:00")], [tx(400, "10:00")]);
     expect(d.closedBy?.id).toBe(2);
   });
+
+  it("starts the calendar day at midnight in Japan, including sales before 09:00 JST", () => {
+    const d = computeDrawer(
+      [ev(1, "float", 1000, "08:30")],
+      [
+        { ...tx(900, "23:59"), createdAt: at("23:59", "2026-10-02") },
+        tx(200, "00:00"),
+        tx(300, "08:00"),
+        tx(400, "09:00"),
+        tx(500, "08:10", { voided: true }),
+        tx(600, "08:20", { paymentMethod: "card" }),
+      ]
+    );
+    expect(d.salesBeforeFloat).toBe(500);
+    expect(d.cashSales).toBe(400);
+    expect(d.expected).toBe(1400);
+  });
+
+  it("excludes the previous day's cash events recorded in the same second as the new float", () => {
+    const events = [
+      ev(1, "float", 2000, "09:00"),
+      ev(2, "collect", 500, "17:00"),
+      ev(3, "count", 1500, "17:00"),
+      ev(4, "return", 1000, "17:00"),
+      ev(5, "float", 3000, "17:00"),
+      ev(6, "collect", 100, "17:00"),
+      ev(7, "return", 200, "17:00"),
+    ];
+    const d = computeDrawer(events.toReversed(), []);
+    expect(d.closedBy).toBeNull();
+    expect(d.collected).toBe(100);
+    expect(d.returned).toBe(200);
+    expect(d.expected).toBe(2700);
+    expect(computeDrawer([...events, ev(8, "count", 2700, "17:00")], []).closedBy?.id).toBe(8);
+  });
 });
 
 describe("shouldCollect", () => {
@@ -239,6 +274,21 @@ describe("computeCoins (what is in the box, note by note)", () => {
     const events = [ev(3, "return", 1000, "17:00"), ev(2, "count", 5000, "17:00", undefined, { breakdown: counted }), float];
     const c = computeCoins(events, []);
     expect(c.box).toMatchObject({ 1000: 0, 500: 4, 100: 20 });
+  });
+
+  it("starts the coin estimate from the new float when the previous day closed in the same second", () => {
+    const events = [
+      float,
+      ev(2, "count", 5000, "17:00", undefined, { breakdown: { "1000": 5 } }),
+      ev(3, "return", 1000, "17:00"),
+      ev(4, "float", 2000, "17:00", undefined, { breakdown: { "100": 20 } }),
+      ev(5, "exchange", 1000, "17:00", undefined, { breakdown: { "100": -10, "500": 2 } }),
+    ];
+    const c = computeCoins(events.toReversed(), []);
+    expect(c.box).toMatchObject({ 1000: 0, 500: 2, 100: 10 });
+    expect(c.prepared[100]).toBe(20);
+    const depleted = computeCoins([...events, ev(6, "collect", 1800, "17:01")], []);
+    expect(depleted.low).toContainEqual({ denomination: 100, count: 2, prepared: 20 });
   });
 
   it("warns when a coin prepared for change is down to a fifth of the float", () => {

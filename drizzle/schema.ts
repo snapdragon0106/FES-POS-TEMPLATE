@@ -162,7 +162,9 @@ export const activityLogs = mysqlTable("activity_logs", {
   operator: varchar("operator", { length: 10 }).notNull(),
   operatorName: varchar("operatorName", { length: 50 }).notNull().default(""),
   action: varchar("action", { length: 30 }).notNull(),
-  detail: varchar("detail", { length: 255 }),
+  // Includes generated text around user notes and lists of deleted IDs.
+  // A valid 255-character note alone can exceed a VARCHAR(255) log entry.
+  detail: text("detail"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

@@ -635,6 +635,30 @@ describe("POS System API", () => {
       expect(db.createActivityLog).toHaveBeenCalledWith(expect.objectContaining({ action: "delete_tx", detail: expect.stringContaining("たこ焼き×1") }));
     });
 
+    it("preserves every item in a long deletion log", async () => {
+      const db = await import("./db");
+      const items = Array.from({ length: 8 }, (_, i) => ({ name: `${i}番の商品${"あ".repeat(90)}`, qty: 1 }));
+      (db.getTransactionById as any).mockResolvedValueOnce({ id: 1, total: 3200, voided: true, items });
+      (posAuth.verifyPosSession as any).mockResolvedValue({ operatorId: ADMIN, operatorName: "テスト 生徒09" });
+      await caller.transaction.delete({ id: 1 });
+      const detail = (db.createActivityLog as any).mock.calls[0][0].detail;
+      expect(detail.length).toBeGreaterThan(500);
+      for (const item of items) expect(detail).toContain(`${item.name}×1`);
+    });
+
+    it("preserves every selected ID in a long bulk-deletion log", async () => {
+      const db = await import("./db");
+      const ids = Array.from({ length: 1000 }, (_, i) => 100000 + i);
+      (db.getTransactionsByIds as any).mockResolvedValueOnce(ids.map((id) => ({ id, voided: true })));
+      (db.deleteVoidedTransactionsByIds as any).mockResolvedValueOnce(ids.length);
+      (posAuth.verifyPosSession as any).mockResolvedValue({ operatorId: ADMIN, operatorName: "テスト 生徒09" });
+      await caller.transaction.deleteMany({ ids });
+      const detail = (db.createActivityLog as any).mock.calls[0][0].detail;
+      expect(detail).toContain("1000件");
+      for (const id of ids) expect(detail).toContain(`#${id}`);
+      expect(Buffer.byteLength(detail, "utf8")).toBeLessThan(65536);
+    });
+
     it("refuses to delete a sale that hasn't been voided (its money would vanish)", async () => {
       const db = await import("./db");
       (db.getTransactionById as any).mockResolvedValueOnce({ id: 1, total: 400, voided: false, items: [] });

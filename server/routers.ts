@@ -695,7 +695,7 @@ export const appRouter = router({
           operator: op.operatorId,
           operatorName: memberName(op.operatorId),
           action: "delete_tx",
-          detail: `取消済みの取引#${input.id} (¥${tx.total.toLocaleString("ja-JP")}) を削除: ${describeItems(tx.items)}`.slice(0, 500),
+          detail: `取消済みの取引#${input.id} (¥${tx.total.toLocaleString("ja-JP")}) を削除: ${describeItems(tx.items)}`,
         });
         return { success: true };
       }),
@@ -718,7 +718,7 @@ export const appRouter = router({
           operator: op.operatorId,
           operatorName: memberName(op.operatorId),
           action: "delete_tx",
-          detail: `取消済みの取引を${deletedCount}件まとめて削除（#${rows.map((t) => t.id).join(", #")}）`.slice(0, 500),
+          detail: `取消済みの取引を${deletedCount}件まとめて削除（#${rows.map((t) => t.id).join(", #")}）`,
         });
         return { success: true, count: deletedCount };
       }),
